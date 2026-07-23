@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    overflow: hidden;
+    user-select: none;
+  }
+  .glow-edge {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    box-shadow:
+      inset 0 0 40px 8px rgba(90, 130, 209, 0.55),
+      inset 0 0 90px 24px rgba(90, 130, 209, 0.28);
+    animation: nte-capture-pulse 2.2s ease-in-out infinite;
+  }
+  @keyframes nte-capture-pulse {
+    0%, 100% { opacity: 0.75; }
+    50%      { opacity: 1; }
+  }
+  /* Diagnostic: briefly flashes red the instant a synthetic click fires, so
+     it's visible on screen whether/when a click was actually sent — see
+     overlay.js's flashClickIndicator(). Overrides the blue glow's shadow
+     color and pauses the pulse animation so the red is unambiguous. */
+  .glow-edge--click {
+    animation-play-state: paused;
+    box-shadow:
+      inset 0 0 50px 12px rgba(230, 40, 40, 0.85),
+      inset 0 0 110px 30px rgba(230, 40, 40, 0.5);
+    opacity: 1;
+  }
+  /* Calibration's actual click target. pointer-events stays 'none' outside
+     calibration mode so this window remains fully click-through during a
+     normal capture, exactly as before — only toggled 'auto' (see the
+     .active class below) for the brief window a calibration point is being
+     captured, alongside overlay.js's own setIgnoreMouseEvents(false) call
+     (both are needed: setIgnoreMouseEvents controls whether the OS routes
+     input to this window at all, pointer-events controls whether this
+     specific element is a valid hit target once it does). */
+  .calibration-hit-area {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    cursor: crosshair;
+  }
+  .calibration-hit-area.active {
+    pointer-events: auto;
+  }
+</style>
+</head>
+<body>
+  <div class="glow-edge"></div>
+  <div class="calibration-hit-area" id="calibrationHitArea"></div>
+  <script>
+    // Calibration was originally driven by a system-wide low-level mouse
+    // hook (mouseWatcherProcess.js) watching for a right-click anywhere on
+    // screen — confirmed live that NTE's own window doesn't pass those
+    // clicks through the hook chain (a right-click registered fine
+    // elsewhere, including this app's own windows, but never fired for a
+    // click landing on the game itself — consistent with many games
+    // installing their own input hook ahead of others in the chain as a
+    // basic anti-macro measure). Catching the click on THIS window instead
+    // — our own, sized to sit exactly over the game — sidesteps the whole
+    // question: it's an ordinary DOM event in our own renderer, nothing
+    // system-wide involved.
+    const hitArea = document.getElementById('calibrationHitArea');
+    let calibrating = false;
+
+    window.overlayApi?.onEnableCalibration(() => {
+      calibrating = true;
+      hitArea.classList.add('active');
+    });
+    window.overlayApi?.onDisableCalibration(() => {
+      calibrating = false;
+      hitArea.classList.remove('active');
+    });
+
+    hitArea.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      if (!calibrating) return;
+      const xFraction = e.clientX / window.innerWidth;
+      const yFraction = e.clientY / window.innerHeight;
+      window.overlayApi?.reportCalibrationClick(xFraction, yFraction);
+    });
+  </script>
+</body>
+</html>

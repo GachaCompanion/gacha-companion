@@ -1,0 +1,21 @@
+.hsr-backup-modal { width: 460px; }
+
+.hsr-backup-link {
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: var(--cur-pointer);
+}
+
+/* Overrides .icon-uploader's default portrait icon-slot sizing (100x108,
+   column layout) with a wide horizontal drop target sized for this modal. */
+.hsr-backup-modal .hsr-backup-dropzone {
+  width: 100%;
+  height: auto;
+  margin-top: 16px;
+  padding: 18px;
+}
+.hsr-backup-modal .hsr-backup-dropzone .icon-empty-state {
+  flex-direction: row;
+  padding: 0;
+  font-size: 13px;
+}

@@ -1,0 +1,1063 @@
+/* Register tilt vars as animatable numbers so CSS transitions work on them */
+@property --tilt-x {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+@property --tilt-y {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+/* ── Element color variables ─────────────────────────────────────────────── */
+
+.hsr-card {
+  --elem-color-solid: rgba(150,150,150,0.9);
+  --elem-color-glow:  rgba(150,150,150,0.5);
+  --elem-color-bg:    rgb(14,14,14);
+}
+
+.hsr-card--elem-fire      { --elem-color-solid: rgba(240,80,80,0.9);   --elem-color-glow: rgba(240,80,80,0.5);   --elem-color-bg: rgb(24,4,4);   }
+.hsr-card--elem-ice       { --elem-color-solid: rgba(60,190,255,0.9);  --elem-color-glow: rgba(60,190,255,0.5);  --elem-color-bg: rgb(2,14,26);  }
+.hsr-card--elem-thunder   { --elem-color-solid: rgba(150,100,255,0.9); --elem-color-glow: rgba(150,100,255,0.5); --elem-color-bg: rgb(12,4,28);  }
+.hsr-card--elem-wind      { --elem-color-solid: rgba(60,210,150,0.9);  --elem-color-glow: rgba(60,210,150,0.5);  --elem-color-bg: rgb(2,20,14);  }
+.hsr-card--elem-quantum   { --elem-color-solid: rgba(90,90,220,0.9);   --elem-color-glow: rgba(90,90,220,0.5);   --elem-color-bg: rgb(6,6,22);   }
+.hsr-card--elem-imaginary { --elem-color-solid: rgba(210,185,60,0.9);  --elem-color-glow: rgba(210,185,60,0.5);  --elem-color-bg: rgb(22,18,2);  }
+.hsr-card--elem-physical  { --elem-color-solid: rgba(190,190,190,0.9); --elem-color-glow: rgba(190,190,190,0.5); --elem-color-bg: rgb(16,16,16); }
+
+/* ── Tilt wrapper ────────────────────────────────────────────────────────── */
+
+.hsr-card__tilt-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  /* Promote to a permanent, full-resolution composited layer so Chromium
+     doesn't rasterize the 3D-rotated card at reduced quality mid-animation
+     (which made everything blur while tilting). */
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* ── Card shell ──────────────────────────────────────────────────────────── */
+
+.hsr-card {
+  font-family: 'Lato', serif;
+  font-weight: 700;
+  color: #fff;
+  /* No inherited text shadow — floating text shadows are done per-region with a
+     duplicated, blackened, transform-driven clone layer (composite, no paint). */
+  text-shadow: none;
+  background: transparent;
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  -webkit-mask-image:
+    radial-gradient(circle at 0 0,        transparent 21px, black 21px),
+    radial-gradient(circle at 100% 0,     transparent 21px, black 21px),
+    radial-gradient(circle at 0 100%,     transparent 21px, black 21px),
+    radial-gradient(circle at 100% 100%,  transparent 21px, black 21px),
+    radial-gradient(circle at 24% 0,      transparent 21px, black 21px),
+    radial-gradient(circle at 24% 100%,   transparent 21px, black 21px),
+    radial-gradient(circle at 24% 11.11%, transparent 6px,  black 6px),
+    radial-gradient(circle at 24% 22.22%, transparent 6px,  black 6px),
+    radial-gradient(circle at 24% 33.33%, transparent 6px,  black 6px),
+    radial-gradient(circle at 24% 44.44%, transparent 6px,  black 6px),
+    radial-gradient(circle at 24% 55.56%, transparent 6px,  black 6px),
+    radial-gradient(circle at 24% 66.67%, transparent 6px,  black 6px),
+    radial-gradient(circle at 24% 77.78%, transparent 6px,  black 6px),
+    radial-gradient(circle at 24% 88.89%, transparent 6px,  black 6px);
+  mask-image:
+    radial-gradient(circle at 0 0,        transparent 21px, black 21px),
+    radial-gradient(circle at 100% 0,     transparent 21px, black 21px),
+    radial-gradient(circle at 0 100%,     transparent 21px, black 21px),
+    radial-gradient(circle at 100% 100%,  transparent 21px, black 21px),
+    radial-gradient(circle at 24% 0,      transparent 21px, black 21px),
+    radial-gradient(circle at 24% 100%,   transparent 21px, black 21px),
+    radial-gradient(circle at 24% 11.11%, transparent 6px,  black 6px),
+    radial-gradient(circle at 24% 22.22%, transparent 6px,  black 6px),
+    radial-gradient(circle at 24% 33.33%, transparent 6px,  black 6px),
+    radial-gradient(circle at 24% 44.44%, transparent 6px,  black 6px),
+    radial-gradient(circle at 24% 55.56%, transparent 6px,  black 6px),
+    radial-gradient(circle at 24% 66.67%, transparent 6px,  black 6px),
+    radial-gradient(circle at 24% 77.78%, transparent 6px,  black 6px),
+    radial-gradient(circle at 24% 88.89%, transparent 6px,  black 6px);
+  -webkit-mask-composite: destination-in, destination-in, destination-in, destination-in, destination-in, destination-in, destination-in, destination-in, destination-in, destination-in, destination-in, destination-in, destination-in;
+  mask-composite: intersect;
+}
+
+/* ── Portrait — absolute, spans left + cl columns ────────────────────────── */
+
+.hsr-card__portrait {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* --face-x/--face-y come from GitHub-precomputed PNG face-detection framing
+     (see electron/framingSync.js), set inline per
+     character in HsrCard.js. Default 50%/50% (geometric center) for characters
+     not yet in the dataset, or offline. transform-origin matches object-position
+     so the extra zoom scales in around the same focal point object-fit already
+     centered, instead of re-centering on the box's own middle. */
+  object-position: var(--face-x, 50%) var(--face-y, 50%);
+  transform: scale(1.75);
+  transform-origin: var(--face-x, 50%) var(--face-y, 50%);
+  z-index: 1;
+}
+
+/* Live2D canvas — Fribbels-style SQUARE render area, centered over the portrait.
+   Square is required: the fit centers the whole skeleton in a 1:1 viewport. */
+.hsr-card__live2d {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  height: 100%;          /* square sized to the column HEIGHT (fills vertically) */
+  width: auto;
+  aspect-ratio: 1 / 1;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Host for the shared engine canvas — generates no box of its own, so the
+   adopted .hsr-card__live2d canvas positions against .hsr-card__left-inner. */
+.hsr-card__live2d-host {
+  display: contents;
+}
+
+/* ── Left column glass overlay ───────────────────────────────────────────── */
+
+.hsr-card__glass {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 500;
+  transform: translate(calc(var(--tilt-x, 0) * 6px), calc(var(--tilt-y, 0) * 6px));
+  box-shadow: inset 0 0 60px rgba(0,0,0,0.45);
+  background:
+    linear-gradient(
+      calc(135deg + var(--tilt-y, 0) * 20deg),
+      rgba(255,40,40,0.10)   0%,
+      transparent            20%,
+      transparent            80%,
+      rgba(40,80,255,0.10)   100%
+    ),
+    linear-gradient(to bottom,
+      rgba(255,255,255, calc(0.12 - var(--tilt-x, 0) * 0.18)) 0%,
+      rgba(255,255,255, calc(0.02 - var(--tilt-x, 0) * 0.06)) 40%,
+      rgba(0,0,0,0.00) 60%,
+      rgba(0,0,0, calc(0.12 + var(--tilt-x, 0) * 0.18))       100%
+    );
+}
+
+.hsr-card__glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(120deg,
+      transparent                                        calc( 8% + var(--tilt-y, 0) * -20%),
+      rgba(255,255,255,0.16) calc( 9.5% + var(--tilt-y, 0) * -20%),
+      rgba(255,255,255,0.16) calc(11%   + var(--tilt-y, 0) * -20%),
+      transparent            calc(12.5% + var(--tilt-y, 0) * -20%)
+    ),
+    linear-gradient(120deg,
+      transparent            calc(14% + var(--tilt-y, 0) * -20%),
+      rgba(255,255,255,0.07) calc(15% + var(--tilt-y, 0) * -20%),
+      rgba(255,255,255,0.07) calc(16% + var(--tilt-y, 0) * -20%),
+      transparent            calc(17% + var(--tilt-y, 0) * -20%)
+    ),
+    linear-gradient(120deg,
+      transparent            calc(60% + var(--tilt-y, 0) * -14%),
+      rgba(255,255,255,0.09) calc(61% + var(--tilt-y, 0) * -14%),
+      rgba(255,255,255,0.09) calc(62% + var(--tilt-y, 0) * -14%),
+      transparent            calc(63% + var(--tilt-y, 0) * -14%)
+    );
+  -webkit-mask-image: linear-gradient(to bottom,
+    transparent                                    0%,
+    white       calc(10% + var(--tilt-x, 0) * -14%),
+    white       calc(50% + var(--tilt-x, 0) * -14%),
+    transparent calc(70% + var(--tilt-x, 0) * -14%)
+  );
+  mask-image: linear-gradient(to bottom,
+    transparent                                    0%,
+    white       calc(10% + var(--tilt-x, 0) * -14%),
+    white       calc(50% + var(--tilt-x, 0) * -14%),
+    transparent calc(70% + var(--tilt-x, 0) * -14%)
+  );
+}
+
+.hsr-card__glass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(120deg,
+      transparent            calc(72% + var(--tilt-y, 0) * -20%),
+      rgba(255,255,255,0.15) calc(73% + var(--tilt-y, 0) * -20%),
+      rgba(255,255,255,0.15) calc(74% + var(--tilt-y, 0) * -20%),
+      transparent            calc(75% + var(--tilt-y, 0) * -20%)
+    ),
+    linear-gradient(120deg,
+      transparent              calc(77%   + var(--tilt-y, 0) * -20%),
+      rgba(255,255,255,0.07)   calc(77.5% + var(--tilt-y, 0) * -20%),
+      rgba(255,255,255,0.07)   calc(78.5% + var(--tilt-y, 0) * -20%),
+      transparent              calc(79%   + var(--tilt-y, 0) * -20%)
+    ),
+    linear-gradient(-60deg,
+      transparent            calc(35% + var(--tilt-y, 0) * 14%),
+      rgba(255,255,255,0.06) calc(36% + var(--tilt-y, 0) * 14%),
+      rgba(255,255,255,0.06) calc(37% + var(--tilt-y, 0) * 14%),
+      transparent            calc(38% + var(--tilt-y, 0) * 14%)
+    ),
+    linear-gradient(-60deg,
+      transparent            calc(52%   + var(--tilt-y, 0) * 14%),
+      rgba(255,255,255,0.03) calc(52.8% + var(--tilt-y, 0) * 14%),
+      rgba(255,255,255,0.03) calc(53.6% + var(--tilt-y, 0) * 14%),
+      transparent            calc(54.4% + var(--tilt-y, 0) * 14%)
+    );
+  -webkit-mask-image: linear-gradient(to bottom,
+    transparent                                    30%,
+    white       calc(50% + var(--tilt-x, 0) * -14%),
+    white       calc(85% + var(--tilt-x, 0) * -14%),
+    transparent                                    100%
+  );
+  mask-image: linear-gradient(to bottom,
+    transparent                                    30%,
+    white       calc(50% + var(--tilt-x, 0) * -14%),
+    white       calc(85% + var(--tilt-x, 0) * -14%),
+    transparent                                    100%
+  );
+}
+
+/* ── SVG inline border overlay ───────────────────────────────────────────── */
+
+.hsr-card__svg-outline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 200;
+  overflow: hidden;
+}
+
+/* ── Background pattern ──────────────────────────────────────────────────── */
+
+.hsr-card__gold-inner {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  left: calc(24% + 5px);
+  right: 5px;
+  overflow: hidden;
+  border-radius: 24px;
+  z-index: 0;
+}
+
+.hsr-card__pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: left center;
+  transform: scaleX(-1);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hsr-card__gold-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.40);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Identity hexagon (bottom of left column) ───────────────────────────── */
+
+/* Wrapper carries the positioning, tilt transform and the hex drop-shadow.
+   It is NOT clipped, so the shadow can extend outside the hex. The inner
+   element keeps the clip-path; putting both clip-path and filter on one
+   element would crop the shadow. */
+.hsr-card__identity-hex-wrap {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  will-change: transform;
+  transform: translate(calc(-50% + var(--tilt-x, 0) * 6px), calc(var(--tilt-y, 0) * 6px));
+  width: calc(100% - 40px);
+  z-index: 300;
+}
+
+/* Hex shadow silhouette: a static, blurred, hex-shaped dark copy of the bottom
+   layer. Painted ONCE; the parallax comes purely from a transform that counter-
+   translates the wrapper's +6px float so the shadow stays glued to the card
+   surface while the hex floats above it. transform = GPU composite, no repaint. */
+.hsr-card__identity-hex-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  clip-path: polygon(14% 0%, 86% 0%, 100% 50%, 86% 100%, 14% 100%, 0% 50%);
+  background: rgba(0,0,0,0.5);
+  filter: blur(1px);
+  transform: translate(calc(var(--tilt-x, 0) * -6px), calc(var(--tilt-y, 0) * -6px));
+  will-change: transform;
+  pointer-events: none;
+}
+
+.hsr-card__identity-hex {
+  position: relative;
+  width: 100%;
+  clip-path: polygon(14% 0%, 86% 0%, 100% 50%, 86% 100%, 14% 100%, 0% 50%);
+  padding: 6px 20px;
+}
+
+.hsr-card__identity-hex-content {
+  position: relative;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  /* No own shadow — the hex silhouette (via the wrapper's drop-shadow) is the
+     only caster, so the block reads as one floating piece. */
+  text-shadow: none;
+  align-items: center;
+  gap: 1px;
+  padding-top: 3px;
+}
+
+.hsr-card__identity-hex-nameline {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.hsr-card__identity-hex .hsr-card__elem-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.hsr-card__identity-hex .hsr-card__path-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.hsr-card__identity-hex .hsr-card__name {
+  font-size: 13px;
+  text-align: center;
+}
+
+.hsr-card__identity-hex .hsr-card__identity-sub {
+  justify-content: center;
+}
+
+/* ── LEFT column — portrait ──────────────────────────────────────────────── */
+
+.hsr-card__left {
+  width: 24%;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.hsr-card__left-inner {
+  position: absolute;
+  inset: 5px;
+  overflow: hidden;
+  border-radius: 24px;
+}
+
+/* Element gradient (same as the hexagon) behind the character portrait. */
+.hsr-card__left-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+
+
+/* ── CENTER-LEFT: eidolons + identity + traces + LC ──────────────────────── */
+
+.hsr-card__cl {
+  width: 28%;
+  flex-shrink: 0;
+  display: flex;
+  transform: translate(calc(var(--tilt-x, 0) * 6px), calc(var(--tilt-y, 0) * 6px));
+  will-change: transform;
+  flex-direction: column;
+  padding: 12px 10px 12px 54px;
+  gap: 5px;
+  position: relative;
+  z-index: 300;
+}
+
+/* Eidolon divider — vertical line with diamonds at each end */
+
+.hsr-card__eidolon-divider {
+  position: absolute;
+  left: calc(24% + 54px);
+  top: calc(1 / 9 * 100% - 22px);
+  height: 186px;
+  width: 1px;
+  background: rgba(255,255,255,1);
+  transform: translate(calc(var(--tilt-x, 0) * 6px), calc(var(--tilt-y, 0) * 6px));
+  will-change: transform;
+  z-index: 300;
+  pointer-events: none;
+}
+
+/* Eidolons — vertical strip along divider holes 2–7 */
+
+.hsr-card__eidolons {
+  position: absolute;
+  left: calc(24% + 22px);
+  top: calc(1 / 9 * 100% - 22px);
+  bottom: calc(3 / 9 * 100% + 22px);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  pointer-events: none;
+  z-index: 300;
+  transform: translate(calc(var(--tilt-x, 0) * 6px), calc(var(--tilt-y, 0) * 6px));
+  will-change: transform;
+}
+
+.hsr-card__eidolon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  overflow: visible;          /* was hidden — let the ::before shadow extend out */
+  flex-shrink: 0;
+  position: relative;         /* anchor the ::before silhouette */
+  background: var(--elem-color-bg);
+}
+
+.hsr-card__eidolon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;         /* took over the circle clip from the parent */
+}
+
+/* Circle shadow silhouettes (eidolons + trace skills/nodes): static, blurred,
+   dark disc behind each. Parallax via transform only — composite, no paint. */
+.hsr-card__eidolon::before,
+.hsr-trace-row__skill::before,
+.hsr-trace-row__node--ability::before,
+.hsr-trace-row__node--stat::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.5);
+  filter: blur(1px);
+  transform: translate(calc(var(--tilt-x, 0) * -6px), calc(var(--tilt-y, 0) * -6px));
+  will-change: transform;
+  pointer-events: none;
+}
+
+.hsr-card__eidolon--unlocked {
+  opacity: 1;
+}
+
+.hsr-card__eidolon--locked {
+  opacity: 0.35;
+  filter: grayscale(0.7);
+}
+
+/* Identity */
+
+.hsr-card__identity {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hsr-card__identity-top {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.hsr-card__elem-icon,
+.hsr-card__path-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.8));
+}
+
+.hsr-card__name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.15;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hsr-card__identity-sub {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.hsr-card__stars { font-size: 10px; letter-spacing: 1px; line-height: 1; }
+.hsr-card__stars--r5 { color: #e8b84b; }
+.hsr-card__stars--r4 { color: #c080e0; }
+
+.hsr-card__level {
+  font-size: 12px;
+  color: #ccc;
+  font-weight: 600;
+}
+
+/* ── Skill trace tree ────────────────────────────────────────────────────── */
+
+.hsr-card__traces {
+  position: absolute;
+  top: calc(1 / 9 * 100% - 22px);
+  left: 54px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: flex-start;
+  padding-left: 8px;
+}
+
+.hsr-trace-row {
+  display: flex;
+  align-items: center;
+}
+
+.hsr-trace-row__skill {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--elem-color-bg);
+  border: 1.5px solid rgba(255,255,255,0.25);
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;          /* was hidden — let the ::before shadow extend out */
+}
+
+.hsr-trace-row__skill img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.8));
+}
+
+.hsr-trace-row__skill--boosted {
+  border-color: var(--elem-color-solid);
+  box-shadow: 0 0 6px 1px var(--elem-color-glow);
+}
+
+.hsr-trace-row--summon {
+  gap: 6px;
+}
+
+
+.hsr-trace-row__skill-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.hsr-trace-row__level {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  font-size: 9px;
+  font-weight: 700;
+  background: rgba(0,0,0,0.75);
+  color: #fff;
+  border-radius: 3px;
+  padding: 0 2px;
+  line-height: 13px;
+  min-width: 12px;
+  text-align: center;
+  text-shadow: none;
+  z-index: 1;
+}
+
+.hsr-trace-row__line {
+  width: 8px;
+  height: 1.5px;
+  background: rgba(255,255,255,0.2);
+  flex-shrink: 0;
+}
+
+.hsr-trace-row__node--ability {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--elem-color-bg);
+  border: 1.5px solid rgba(255,255,255,0.2);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;          /* was hidden — let the ::before shadow extend out */
+  position: relative;         /* anchor the ::before silhouette */
+}
+
+.hsr-trace-row__node--ability img {
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.7));
+}
+
+.hsr-trace-row__node--stat {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--elem-color-bg);
+  border: 1.5px solid rgba(255,255,255,0.18);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;          /* was hidden — let the ::before shadow extend out */
+  position: relative;         /* anchor the ::before silhouette */
+}
+
+.hsr-trace-row__node--stat img {
+  width: 72%;
+  height: 72%;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.7));
+}
+
+.hsr-trace-row__node--unlocked { opacity: 1; }
+
+.hsr-trace-row__node--unlocked.hsr-trace-row__node--ability {
+  border-color: var(--elem-color-solid);
+  box-shadow: 0 0 5px 1px var(--elem-color-glow);
+  background: var(--elem-color-bg);
+}
+
+.hsr-trace-row__node--unlocked.hsr-trace-row__node--stat {
+  border-color: rgba(255,255,255,0.45);
+  background: var(--elem-color-bg);
+}
+
+.hsr-trace-row__node--locked {
+  opacity: 0.3;
+  filter: grayscale(0.8);
+}
+
+/* ── Light cone ──────────────────────────────────────────────────────────── */
+
+.hsr-lc {
+  position: absolute;
+  top: calc(62% - 14px);
+  left: 28px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.hsr-lc__icon-wrap {
+  position: relative;
+  width: 100px;
+  flex-shrink: 0;
+  align-self: flex-end;
+}
+
+.hsr-lc__icon {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  position: relative;   /* lift the real icon above the absolute shadow copy */
+  z-index: 1;
+}
+
+/* Light-cone shadow silhouette: a dark, blurred, alpha-following copy of the
+   icon, glued to the card surface (parallax via transform only — composite). */
+.hsr-lc__icon-shadow {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: brightness(0) blur(1px);
+  opacity: 0.5;
+  transform: translate(calc(var(--tilt-x, 0) * -6px), calc(var(--tilt-y, 0) * -6px));
+  will-change: transform;
+  pointer-events: none;
+}
+
+.hsr-lc__info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  position: relative;   /* anchor the .hsr-lc__info-shadow clone layer */
+}
+
+.hsr-lc__name {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.3;
+  white-space: normal;
+}
+
+.hsr-lc__meta {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.hsr-lc__stars     { font-size: 9px; letter-spacing: 1px; line-height: 1; }
+.hsr-lc__stars--r5 { color: #e8b84b; }
+.hsr-lc__stars--r4 { color: #c080e0; }
+.hsr-lc__stars--r3 { color: #6090e0; }
+
+.hsr-lc__sep   { font-size: 10px; color: #aaa; }
+.hsr-lc__rank  { font-size: 11px; color: #fff; }
+.hsr-lc__level { font-size: 10px; color: #ccc; }
+
+.hsr-lc__stats {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.hsr-lc__stat {
+  font-size: 10px;
+  color: #bbb;
+  white-space: nowrap;
+}
+
+/* ── CENTER-RIGHT: stats ─────────────────────────────────────────────────── */
+
+.hsr-card__cr {
+  width: 22%;
+  flex-shrink: 0;
+  display: flex;
+  transform: translate(calc(var(--tilt-x, 0) * 6px), calc(var(--tilt-y, 0) * 6px));
+  will-change: transform;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 22px 10px 22px 6px;
+  gap: 0;
+  position: relative;
+  z-index: 300;
+}
+
+/* Floating text shadow clones: a duplicate of each text region, blackened +
+   blurred, sitting behind the real text and counter-translated so it stays glued
+   to the card surface. transform-driven → composite, no per-frame paint. Each
+   layer mirrors its host's layout (below) so it overlays the real text exactly. */
+.hsr-card__cr-shadow,
+.hsr-lc__info-shadow,
+.hsr-card__set-tag-shadow {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  text-shadow: none;
+  filter: brightness(0) blur(1px);
+  opacity: 0.5;
+  transform: translate(calc(var(--tilt-x, 0) * -6px), calc(var(--tilt-y, 0) * -6px));
+  will-change: transform;
+}
+
+.hsr-card__cr-shadow {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 22px 10px 22px 6px;
+  gap: 0;
+}
+
+.hsr-lc__info-shadow {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.hsr-card__set-tag-shadow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.hsr-card__stat-row {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  position: relative;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.hsr-card__stat-row:last-child {
+  border-bottom: none;
+}
+
+.hsr-card__stat-label {
+  font-size: 11px;
+  color: #fff;
+  font-weight: 600;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hsr-card__stat-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+  /* Static drop-shadow (alpha-following). Painted once; floats with the icon. */
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+}
+
+.hsr-card__stat-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ── RIGHT: single-column relics (4 cavity + gap + 2 planar) ────────────── */
+
+.hsr-card__right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  transform: translate(calc(var(--tilt-x, 0) * 6px), calc(var(--tilt-y, 0) * 6px));
+  will-change: transform;
+  padding: 5px;
+  gap: 3px;
+  position: relative;
+  z-index: 300;
+  border-left: 1px solid rgba(255,255,255,0.07);
+}
+
+.hsr-card__relics {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Set names occupy a relic-sized box (no background) so the column reads as
+   8 uniform spaces: 4 cavity relics, cavity set, 2 planar relics, planar set. */
+.hsr-card__set-tag {
+  flex: 0 0 auto;
+  height: 23px;
+  margin-right: 21px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.15;
+  color: #fff;
+  white-space: normal;
+  position: relative;   /* anchor the .hsr-card__set-tag-shadow clone layer */
+}
+
+/* ── Relic slot layout for HSR ───────────────────────────────────────────── */
+
+.hsr-card__relics .artifact-slot {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  background: rgba(0,0,0,0.9);
+  border-radius: 4px;
+  margin-right: 21px;
+  /* overflow:visible (was hidden) so the ::before shadow silhouette can extend
+     past the box. The icon clip moves to .thumb-col; the dark rounded bg still
+     reads rounded because border-radius clips backgrounds without overflow. */
+  overflow: visible;
+  flex: 0 0 auto;
+  height: 42px;
+  position: relative;
+}
+
+/* Relic shadow silhouette: static, blurred, rounded-rect copy of the bottom
+   layer (the dark slot box). Parallax via transform only — composite, no paint. */
+.hsr-card__relics .artifact-slot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 4px;
+  background: rgba(0,0,0,0.5);
+  filter: blur(1px);
+  transform: translate(calc(var(--tilt-x, 0) * -6px), calc(var(--tilt-y, 0) * -6px));
+  will-change: transform;
+  pointer-events: none;
+}
+
+/* Override Genshin's global arc margins (unscoped .artifact-slot:nth-child
+   rules in genshin.card.css) so every relic thumbnail keeps the same 6px shift.
+   Needs the nth-child selectors to outweigh Genshin's specificity. */
+.hsr-card__relics .artifact-slot:nth-child(1) .artifact-slot__thumb-col,
+.hsr-card__relics .artifact-slot:nth-child(2) .artifact-slot__thumb-col,
+.hsr-card__relics .artifact-slot:nth-child(3) .artifact-slot__thumb-col,
+.hsr-card__relics .artifact-slot:nth-child(4) .artifact-slot__thumb-col,
+.hsr-card__relics .artifact-slot:nth-child(5) .artifact-slot__thumb-col,
+.hsr-card__relics .artifact-slot:nth-child(6) .artifact-slot__thumb-col,
+.hsr-card__relics .artifact-slot:nth-child(7) .artifact-slot__thumb-col {
+  margin-left: 8px;
+}
+
+.hsr-card__relics .artifact-slot__thumb-col {
+  width: 46px;
+  flex-shrink: 0;
+  position: relative;
+  /* Took over the icon clip from the slot (now overflow:visible for its shadow).
+     Round only the left corners — the right edge is interior to the row. */
+  overflow: hidden;
+  border-radius: 4px 0 0 4px;
+}
+
+.hsr-card__relics .artifact-slot__icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+
+.hsr-card__relics .artifact-slot__overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1px;
+}
+
+.hsr-card__relics .artifact-slot__main-row {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.hsr-card__relics .artifact-slot__main-value {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 3px 4px rgba(0,0,0,1), 0 0 5px rgba(0,0,0,1), 0 0 5px rgba(0,0,0,1);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.hsr-card__relics .artifact-slot__meta {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.hsr-card__relics .artifact-slot__star {
+  font-size: 7px;
+  color: #e8b84b;
+  text-shadow: 0 3px 4px rgba(0,0,0,1), 0 0 5px rgba(0,0,0,1), 0 0 5px rgba(0,0,0,1);
+  line-height: 1;
+}
+
+.hsr-card__relics .artifact-slot__level {
+  font-size: 9px;
+  color: #ccc;
+  text-shadow: 0 3px 4px rgba(0,0,0,1), 0 0 5px rgba(0,0,0,1), 0 0 5px rgba(0,0,0,1);
+  line-height: 1.2;
+}
+
+/* Main-stat icon over the relic image — matches Genshin's overlay icon shadow */
+.hsr-card__relics .artifact-slot__overlay img {
+  filter: drop-shadow(0 3px 4px rgba(0,0,0,1)) drop-shadow(0 0 5px rgba(0,0,0,1)) drop-shadow(0 0 5px rgba(0,0,0,1));
+}
+
+/* Substats — reset absolute positioning from genshin.card.css global bleed */
+.hsr-card__relics .artifact-slot__substats {
+  position: static;
+  left: auto;
+  right: auto;
+  top: auto;
+  bottom: auto;
+  flex: 1;
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto auto;
+  justify-content: start;
+  gap: 6px 16px;
+  padding: 3px 5px 3px 20px;
+  align-content: center;
+  align-items: center;
+}
+
+.hsr-card__relics .artifact-slot__sub-pair {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.hsr-card__relics .artifact-slot__sub-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.hsr-card__relics .artifact-slot__sub-value {
+  font-size: 10px;
+  color: #ddd;
+  white-space: nowrap;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+}
+
+.hsr-card__relics .artifact-slot__sub--empty {
+  visibility: hidden;
+}
+
+.hsr-card__relics .artifact-slot--empty {
+  background: rgba(255,255,255,0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hsr-card__relics .artifact-slot__empty-label {
+  font-size: 9px;
+  color: rgba(255,255,255,0.2);
+  text-shadow: none;
+}

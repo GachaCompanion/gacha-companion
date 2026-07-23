@@ -1,0 +1,457 @@
+.zc {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  width: 100%;
+}
+
+/* ── Main panel ── */
+.zc-panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-lg);
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  flex: 0 0 380px;
+  box-sizing: border-box;
+}
+
+html.has-bg .zc-panel {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ── Settings row ── */
+.zc-settings {
+  display: flex;
+  gap: 0;
+  align-items: flex-start;
+}
+
+.zc-resources {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 170px;
+  padding-right: 20px;
+}
+
+.zc-resource-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.zc-vsep {
+  width: 1px;
+  background: var(--border);
+  align-self: stretch;
+  flex-shrink: 0;
+  margin: 0 20px;
+}
+
+/* ── Pull count ──
+   Sits under the Pity/Guaranteed state columns (via .zc-state-wrap), not
+   under Resources — the count describes what the Pity fields translate to,
+   so it reads more naturally next to them than under the raw currency inputs. */
+.zc-pull-count {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
+
+.zc-pull-count:first-of-type { margin-top: 14px; }
+
+.zc-pull-count strong {
+  font-size: 15px;
+}
+
+/* ── State columns ── */
+.zc-state-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.zc-state {
+  display: flex;
+  gap: 20px;
+}
+
+.zc-state-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* ── Number inputs ── */
+.zc-numfield {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.zc-numfield-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.zc-numfield-input {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  padding: 6px 10px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.zc-numfield-input:focus { border-color: var(--accent); }
+.zc-numfield-input::-webkit-outer-spin-button,
+.zc-numfield-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.zc-numfield-input[type=number] { -moz-appearance: textfield; }
+
+.zc-numfield--compact .zc-numfield-input {
+  width: 72px;
+  font-size: 13px;
+}
+
+/* ── State column fields ── */
+.zc-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.zc-field-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* ── Segmented controls ── */
+.zc-seg {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.zc-seg-btn {
+  padding: 5px 11px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: var(--cur-pointer);
+  transition: background 0.12s, color 0.12s;
+  border-right: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.zc-seg-btn:last-child { border-right: none; }
+.zc-seg-btn:hover { background: var(--bg-hover); color: var(--text-secondary); }
+.zc-seg-btn--active { background: var(--bg-elevated); }
+
+/* ── Target selectors ── */
+.zc-targets-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.zc-dropdown-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.zc-target-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.zc-select {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  padding: 6px 10px;
+  width: 100%;
+  outline: none;
+  cursor: var(--cur-pointer);
+  transition: border-color 0.15s, color 0.15s;
+  appearance: auto;
+}
+
+.zc-select:focus { border-color: var(--accent); }
+
+/* ── Run button ── */
+.zc-run-btn {
+  padding: 11px 24px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  cursor: var(--cur-pointer);
+  transition: opacity 0.15s;
+  align-self: flex-start;
+}
+
+.zc-run-btn:hover:not(:disabled) { opacity: 0.85; }
+.zc-run-btn:disabled { opacity: 0.5; cursor: var(--cur-default); }
+
+.zc-run-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: -14px;
+}
+
+/* ── Results header ── */
+.zc-results-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.zc-results-header .section-title {
+  margin: 0;
+}
+
+.zc-info-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  color: var(--text-secondary);
+  cursor: var(--cur-pointer);
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.zc-info-btn:hover { color: #ffffff; }
+
+/* ── Results panel ── */
+.zc-results-panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+html.has-bg .zc-results-panel {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.zc-results-placeholder {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* Shared column grid */
+.zc-results-cols,
+.zc-result-row {
+  display: grid;
+  grid-template-columns: 76px 1fr 1fr;
+}
+
+/* Fixed column headers */
+.zc-results-cols {
+  margin-top: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.zc-col-goal {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+}
+
+.zc-col-right {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+/* Scrollable milestone rows — fixed at 5-row height, scrolls beyond */
+.zc-results-scroll {
+  overflow-y: auto;
+  height: 190px;
+}
+
+.zc-result-row {
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  animation: zc-fade-in 0.2s ease;
+}
+
+.zc-result-row:last-child { border-bottom: none; }
+
+@keyframes zc-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.zc-col-goal--value {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.zc-col-num {
+  font-size: 13px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.zc-col-chance {
+  font-size: 13px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.zc-row-sep {
+  height: 1px;
+  background: var(--border);
+}
+
+/* Fixed footer */
+.zc-results-footer {
+  border-top: 2px solid var(--border);
+  padding-top: 10px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.zc-footer-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+.zc-result-row--target {
+  border-bottom: 1px solid var(--border);
+}
+
+.zc-result-row--target:last-child {
+  border-bottom: none;
+}
+
+/* ── Info modal ── */
+.zc-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: zc-fadeIn 0.15s ease;
+  border-radius: 10px;
+}
+
+.zc-modal-overlay--closing {
+  animation: zc-fadeOut 0.18s ease forwards;
+  pointer-events: none;
+}
+
+@keyframes zc-fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes zc-fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+.zc-modal {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  width: 380px;
+  max-width: calc(100vw - 40px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.zc-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.zc-modal-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.zc-modal-close {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: var(--cur-pointer);
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.zc-modal-close:hover { color: var(--text-primary); }
+
+.zc-modal-body {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}

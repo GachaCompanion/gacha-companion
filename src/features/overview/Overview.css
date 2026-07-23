@@ -1,0 +1,375 @@
+/* ─── Page shell ────────────────────────────────────────────────────────────── */
+
+.overview-right {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+}
+
+.overview-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.overview-main {
+  height: 100%;
+}
+
+/* ─── Carousel ──────────────────────────────────────────────────────────────── */
+
+.overview-carousel {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  gap: 20px;
+}
+
+.overview-carousel-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.overview-carousel-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  color: var(--text-muted, #949ba4);
+}
+
+/* Sits below the card grid — a third flex child of .overview-carousel,
+   centered by that container's own align-items:center like everything
+   else in it, so it naturally lands under whichever row is active. */
+.overview-carousel-flip-all {
+  padding: 8px 20px;
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: var(--cur-pointer);
+  outline: 2px solid transparent;
+  outline-offset: -1px;
+  transition: color 0.15s, border-color 0.15s, outline-color 0.15s;
+}
+
+.overview-carousel-flip-all:hover {
+  color: var(--text-primary);
+  border-color: var(--accent);
+  outline-color: var(--accent);
+}
+
+.overview-carousel-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: var(--cur-pointer);
+  outline: 2px solid transparent;
+  outline-offset: -1px;
+  transition: color 0.15s, border-color 0.15s, outline-color 0.15s;
+}
+
+.overview-carousel-back--home {
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+  transition: color 0.15s, background 0.15s, border-color 0.15s, outline-color 0.15s;
+}
+
+.overview-carousel-back:hover {
+  color: var(--text-primary);
+  border-color: var(--accent);
+  outline-color: var(--accent);
+}
+
+/* Showcase/Gacha Tracker (not Home, which already has its own always-accent
+   look) — outline is always on (white at rest) rather than only appearing
+   on hover, and the glyph itself turns the app's accent color on hover
+   instead of just the shared text-primary swap. Needs the extra :not()
+   specificity to win over the shared rules above. */
+.overview-carousel-back:not(.overview-carousel-back--home) {
+  outline-color: var(--bg-elevated);
+}
+.overview-carousel-back:not(.overview-carousel-back--home):hover {
+  color: var(--accent);
+  outline-color: var(--accent);
+}
+
+/* Comes after the shared :hover rule above so it wins on source order —
+   both have equal specificity (class + :hover), and this needs to override
+   the shared color/border-color for the swap effect to actually apply. */
+.overview-carousel-back--home:hover {
+  color: var(--accent);
+  background: #fff;
+  outline-color: #fff;
+}
+
+/* Row-dots are positioned absolutely (see .overview-carousel-row-dots)
+   rather than sitting in-flow next to the grid — an in-flow dots column
+   would add its own width to this block, and since .overview-carousel
+   centers this block as a whole, that extra width on the right shifted
+   the actual card grid off true center. Taking dots out of flow lets the
+   grid alone (full width) own the centering. */
+.overview-carousel-body {
+  position: relative;
+  width: 100%;
+}
+
+/* Viewport is exactly ONE row tall with scroll-snap, so only one row is
+   ever visible at a time — since .overview-carousel centers this box via
+   justify-content:center, whichever row is snapped into view is always
+   vertically centered too, rather than just the whole multi-row stack
+   being centered as a unit. */
+/* height/padding = one card (320px) plus a 40px reveal gap on each edge —
+   that gap is real scrollable space (not just the mask), so the next/prev
+   row peeks into it while scrolling, and the idle/snapped row always lands
+   fully inside the opaque part of the mask below, never faded itself.
+   scroll-padding-block keeps that same 40px gap for every row, not just
+   the first (which would otherwise get it for free from being unable to
+   scroll further up). */
+.overview-carousel-grid {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 48px;
+  height: 400px;
+  padding: 40px 0;
+  box-sizing: border-box;
+  scroll-padding-block: 40px;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Mask only applies while actually scrolling (see OverviewCarousel.js's
+   `scrolling` state) — at rest a card's own edge sits exactly where the
+   fade begins (no headroom), so leaving the mask on all the time meant a
+   card's flip "lift" animation crossed into the fade zone and visibly
+   faded out mid-flip. */
+.overview-carousel-grid--scrolling {
+  mask-image: linear-gradient(to bottom, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
+}
+.overview-carousel-grid::-webkit-scrollbar {
+  display: none; /* Chrome/Electron */
+}
+
+.overview-carousel-grid-row {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
+
+/* Flip wrapper — owns the size/perspective/click target; the actual card
+   faces are absolutely positioned inside .overview-carousel-flip-inner so
+   they can share the same box and rotate as a pair (front/back). */
+/* animation-name is set inline per click (see CarouselCard in
+   OverviewCarousel.js), alternating between two identical keyframes each
+   time — changing the name is what makes the browser restart the animation
+   on every click, even on rapid repeat clicks where the class list itself
+   never changes. animation-fill-mode:none matters here too: it makes sure
+   the lift fully un-does itself back to the base (un-transformed) state
+   between plays, rather than something lingering. */
+.overview-carousel-flip {
+  width: 210px;
+  height: 320px;
+  flex-shrink: 0;
+  perspective: 1400px;
+  cursor: var(--cur-pointer);
+  animation-duration: 0.55s;
+  animation-timing-function: ease;
+  animation-fill-mode: none;
+}
+
+/* Sequenced, not simultaneous, with the flip's own rotation (on
+   .overview-carousel-flip-inner below, which has a matching 0.12s
+   transition-delay) — zooms/lifts toward the viewer first (0%-21%, ~0.12s),
+   holds while the flip itself plays underneath (21%-79%, ~0.31s), then
+   settles back down (79%-100%, ~0.12s). 0.12 + 0.31 + 0.12 = 0.55s total,
+   matching this element's own animation-duration above. */
+@keyframes overviewCardLiftA {
+  0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 0 rgba(0, 0, 0, 0)); }
+  21%, 79%  { transform: translateY(-16px) scale(1.08); filter: drop-shadow(0 14px 16px rgba(0, 0, 0, 0.4)); }
+}
+@keyframes overviewCardLiftB {
+  0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 0 rgba(0, 0, 0, 0)); }
+  21%, 79%  { transform: translateY(-16px) scale(1.08); filter: drop-shadow(0 14px 16px rgba(0, 0, 0, 0.4)); }
+}
+
+/* Turns right-to-left, like a page — the right edge recedes first.
+   Rotation angle itself is set inline (flipCount * 180deg) rather than
+   here, so each click keeps rotating the same direction instead of
+   unwinding back through 0deg on the way to the front face again. The
+   0.12s delay holds the rotation off until the lift's own zoom-in phase
+   (see .overview-carousel-flip's keyframes) has finished, so the sequence
+   reads as zoom in, then flip, then zoom back out — not all three at once. */
+.overview-carousel-flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.31s ease 0.12s;
+  transform-style: preserve-3d;
+}
+
+.overview-carousel-card {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%; /* fixed so every card is as tall as the biggest one (dual currency + full pity/guaranteed rows), not content-sized */
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+  backface-visibility: hidden;
+  outline: 2px solid transparent;
+  outline-offset: -1px;
+  transition: border-color 0.15s ease, outline-color 0.15s ease;
+}
+
+.overview-carousel-flip:hover .overview-carousel-card {
+  border-color: var(--accent);
+  outline-color: var(--accent);
+}
+
+.overview-carousel-card-back {
+  transform: rotateY(180deg);
+}
+
+.overview-carousel-stats-empty {
+  margin: auto 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.overview-carousel-row-dots {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.overview-carousel-row-dot {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background: var(--border);
+  cursor: var(--cur-pointer);
+  transition: background 0.15s, border-color 0.15s;
+}
+.overview-carousel-row-dot--active {
+  background: var(--accent);
+  border-color: #fff;
+}
+
+.overview-carousel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.overview-carousel-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--bg-hover);
+}
+
+.overview-carousel-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.overview-carousel-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.overview-carousel-section {
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+}
+.overview-carousel-section:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.overview-carousel-row-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 3px 0;
+}
+.overview-carousel-row-item span:first-child { color: var(--text-secondary); }
+.overview-carousel-row-item span:last-child  { color: var(--text-primary); font-weight: 500; }
+
+.overview-carousel-row-item--currency {
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  font-size: 15px;
+  padding: 5px 0;
+}
+
+/* Dual-currency games (NTE, WuWa) show their two pull items side by side on
+   one row instead of stacked — each CurrencyRow takes half the width. */
+.overview-carousel-dual-row {
+  display: flex;
+}
+.overview-carousel-dual-row .overview-carousel-row-item--currency {
+  flex: 1;
+  min-width: 0;
+}
+
+.overview-carousel-currency-icon {
+  height: 26px;
+  width: auto;
+  object-fit: contain;
+}
+
+.overview-carousel-daily {
+  margin-top: auto; /* pins it to the bottom of the fixed-height card, regardless of how much content is above it */
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+}
+.overview-carousel-daily--open {
+  background: color-mix(in srgb, var(--danger) 18%, transparent);
+  color: var(--danger);
+}
+.overview-carousel-daily--done {
+  background: color-mix(in srgb, var(--success) 18%, transparent);
+  color: var(--success);
+}

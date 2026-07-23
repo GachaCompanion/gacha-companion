@@ -1,0 +1,191 @@
+.nte-pull-log-tab {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  /* No gap here — spacing around the divider comes from the shared
+     .pl-banner-bar's padding-bottom + .pl-lower's padding-top (both classes
+     NTE reuses), same as HistoryTab.css's .pull-log. A gap here on top of
+     those double-counted the space below the line. */
+  overflow: hidden;
+}
+
+/* Banner panel sits on the right via .pl-lower/.pl-left/.pl-banner-panel,
+   reused directly from HistoryTab.css (same as .pl-rarity-btn/.pl-banner-btn/
+   .pl-load-more below) — matches GI/HSR/ZZZ's layout exactly, not a
+   NTE-specific variant. See .pl-bcard* usage in NtePullLogTab.js. */
+
+/* .pl-list is a shared class (also used by HistoryTab.js), so this custom
+   property is scoped to NTE's own subtree — no collision with GI/HSR/ZZZ's
+   --pl-grid-cols defined on the same shared class there. */
+.nte-pull-log-tab .pl-list {
+  /* Category column shrunk 3px (110 -> 107) to make room for the thicker scrollbar. */
+  --nte-pl-grid-cols: 40px 1fr 90px 107px 60px 60px 140px;
+}
+
+/* Sticky first child of .pl-list, same treatment as HistoryTab.css's
+   .pl-header-row — see that rule's comments for why each piece is here
+   (opaque solid bg so scrolled rows can't show through, transform for the
+   Electron/Chromium sticky repaint bug, margin/padding bleed to cover the
+   .sa-viewport scrollbar gutter). Padding matches .nte-pl-row's exactly
+   (not the old 18px right / no left-right symmetry) so columns from the two
+   stay aligned now that they share one scrolling card. */
+.nte-pl-header-row {
+  display: grid;
+  grid-template-columns: var(--nte-pl-grid-cols);
+  gap: 12px;
+  padding: 7px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--panel-border);
+  transform: translateZ(0);
+  margin-right: -10px;
+  padding-right: 22px;
+}
+
+/* The white-stroke/black-shadow outline this row's span used to have (for
+   legibility over busy backgrounds) was removed — same reasoning as
+   HistoryTab.css's .pl-header-row: this header sits on a fully opaque
+   var(--bg-elevated) background already, so the outline was just adding
+   visual bulk around every glyph, independent of the actual font-weight. */
+
+.nte-pl-row {
+  display: grid;
+  grid-template-columns: var(--nte-pl-grid-cols);
+  gap: 12px;
+  align-items: center;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--border);
+  border-left: 3px solid transparent;
+  font-size: 13px;
+  transition: background 0.1s;
+  /* Same right-edge bleed as .nte-pl-header-row — see that rule's comment. */
+  margin-right: -10px;
+  padding-right: 22px;
+}
+.nte-pl-row:last-child { border-bottom: none; }
+.nte-pl-row:hover { background: var(--bg-hover); }
+
+.nte-pl-row--r5 {
+  border-left-color: #fdb50b;
+  background: rgba(253, 181, 11, 0.08);
+}
+.nte-pl-row--r4 {
+  border-left-color: #e73fbd;
+  background: rgba(231, 63, 189, 0.08);
+}
+
+.nte-pl-rarity {
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  text-align: center;
+}
+
+.nte-pl-name {
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nte-pl-banner {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.nte-pl-category {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.nte-pl-roll,
+.nte-pl-pity {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  text-align: right;
+}
+
+.nte-pl-bonus-tag {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  opacity: 0.75;
+}
+
+.nte-pl-date {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  text-align: right;
+}
+
+.nte-pl-date-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+/* ─── Background-image overrides ─────────────────────────────────────────────
+   Mirrors HistoryTab.css's "Background-image overrides: white text + darker
+   blur" block (its .pl-type/.pl-banner/.pl-roll/.pl-date/.pl-pity rules) —
+   NTE uses its own class names for these columns (.nte-pl-banner etc., not
+   .pl-banner), so those rules never applied here. .pl-list itself (the
+   row-list container) IS a shared class already, so its own has-bg
+   darker-blur background comes for free. The header row no longer needs a
+   has-bg-specific rule here — see the always-on double-outline treatment
+   on .nte-pl-header-row span above, which replaced it. */
+html.has-bg .nte-pl-banner,
+html.has-bg .nte-pl-category,
+html.has-bg .nte-pl-roll,
+html.has-bg .nte-pl-pity,
+html.has-bg .nte-pl-date,
+html.has-bg .nte-pl-bonus-tag {
+  color: #e8e9f0;
+}
+
+/* Sized to match .pl-rarity-btn (S/A/B-Class buttons) exactly, so the
+   Character/Arc/Item category filters don't make this row taller than the
+   other 3 games' equivalent row — same class (.pl-banner-btn) as the full-size
+   banner-type buttons in the top row, just shrunk down here. */
+.nte-pl-category-btn {
+  padding: 5px 13px;
+  font-size: 10px;
+  /* .pl-banner-btn doesn't set its own line-height (browser default applies),
+     while .pl-rarity-btn explicitly uses 1 — without this, the default's
+     extra line-box height made this button (and so the whole filter row)
+     a couple pixels taller than the rarity buttons despite matching padding. */
+  line-height: 1;
+}
+
+.nte-pl-empty {
+  padding: 30px 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* Centered in the card, same as HistoryTab.css's .pl-scroll-area .history-empty
+   override — ScrollArea's outer wrapper (.pl-scroll-area) is already
+   position:relative. */
+.pl-scroll-area .nte-pl-empty {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  padding: 0;
+}
+

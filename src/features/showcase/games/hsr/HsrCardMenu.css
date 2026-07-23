@@ -1,0 +1,99 @@
+/* HSR showcase card menu — occupies the strip revealed when the sidebar
+   collapses (≈ the 160px the sidebar gives up: 220 → 60). */
+
+/* Positioned in the strip the collapsed sidebar reveals (left = 60px rail),
+   and vertically matched to the card's bounds (top/height set inline).
+   position:fixed (viewport-relative) rather than absolute — Sidebar lives
+   outside this component's own page (a sibling in App.js, not an
+   ancestor), so there's no shared positioned ancestor whose left edge
+   lines up with the sidebar's own left edge to be absolute against. */
+.hsr-card-menu {
+  position: fixed;
+  left: 60px;
+  width: 160px;
+  z-index: 2;
+  box-sizing: border-box;
+  padding: 24px 16px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 18px;
+  /* Hidden by default; fade OUT (sidebar expanding) is faster than the sidebar's
+     0.25s extension so the menu clears before the sidebar covers it. */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+/* Visible when the sidebar is collapsed; fade IN matches the sidebar collapse. */
+.hsr-card-menu--visible {
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.25s ease;
+}
+
+/* ── A labelled control ── */
+.hsr-card-menu__field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.hsr-card-menu__field-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ── PNG ↔ Live2D switch ── */
+.hsr-card-menu__switch {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  height: 30px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  overflow: hidden;
+  user-select: none;
+  -webkit-app-region: no-drag;
+}
+
+/* Sliding highlight that covers the active half. */
+.hsr-card-menu__switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: calc(50% - 2px);
+  height: calc(100% - 4px);
+  border-radius: 6px;
+  background: linear-gradient(rgba(120, 180, 255, 0.55), rgba(70, 120, 220, 0.55));
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  transition: left 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hsr-card-menu__switch--right .hsr-card-menu__switch-knob {
+  left: 50%;
+}
+
+.hsr-card-menu__switch-opt {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+  transition: color 0.2s ease;
+  pointer-events: none;
+}
+
+/* The option under the knob reads as active. */
+.hsr-card-menu__switch:not(.hsr-card-menu__switch--right) .hsr-card-menu__switch-opt--left,
+.hsr-card-menu__switch--right .hsr-card-menu__switch-opt--right {
+  color: #fff;
+}

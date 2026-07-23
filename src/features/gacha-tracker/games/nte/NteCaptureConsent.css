@@ -1,0 +1,17 @@
+.nte-consent-modal { width: 420px; }
+
+.nte-consent-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  background: var(--accent-glow);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+.nte-consent-warning svg { color: var(--accent); flex-shrink: 0; }
+
+.nte-consent-note { margin-top: 12px; font-size: 12px; color: var(--text-muted); }

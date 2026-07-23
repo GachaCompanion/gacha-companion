@@ -1,0 +1,392 @@
+.homepage {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: transparent; /* shared app-bg-layer provides the background */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* TitleBar sits outside .homepage-content so it never fades with the content */
+.homepage .title-bar {
+  width: 100%;
+  align-self: stretch;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+/* Animations target .homepage-content so the TitleBar above it stays visible */
+
+/* Short fade-in on home-button return — starts after tracker is 67% faded out */
+.homepage--returning .homepage-content {
+  animation: homepageFadeIn 0.3s ease;
+}
+
+@keyframes homepageFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Exit: content fades out — 0.3s so tracker fades in at the 67% mark */
+.homepage--exiting .homepage-content {
+  animation: homepageFadeOut 0.3s ease-in forwards;
+}
+
+@keyframes homepageFadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+
+/* ─── Content block ─────────────────────────────────────────────────────────── */
+
+.homepage-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  padding-top: 18vh;
+}
+
+/* ─── Splash (logo + filling outline) ──────────────────────────────────────── */
+
+.homepage-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: homepageFadeIn 0.3s ease;
+  transition: opacity 0.5s ease;
+}
+
+.homepage-splash--exit {
+  opacity: 0;
+}
+
+.homepage-splash-frame {
+  position: relative;
+  width: 348px;
+  height: 348px;
+}
+
+/* Sits behind the logo image but above the loading outline. Radius kept
+   concentric with the outline's own curve (rx=44 at a 2px inset) — this
+   panel sits 3px further in (5px inset), so its radius is 44-3=41, tracing
+   a true parallel offset of the outline's arc rather than an uneven bite
+   into it (mismatched radius/inset deltas made the corner look flattened,
+   not a clean quarter-circle). */
+.homepage-splash-backing {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border-radius: 41px;
+  background: #0f0f13;
+}
+
+/* Positioning only — the gradient/outline/shadow styling lives on the SVG
+   <text> itself now (see HomePage.js), not this wrapper. */
+.homepage-splash-progress {
+  position: absolute;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  overflow: visible;
+}
+
+.homepage-splash-logo {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  width: 320px;
+  height: 320px;
+  object-fit: cover;
+  border-radius: 32px;
+}
+
+.homepage-splash-outline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  animation: splashOutlineFadeIn 0.5s ease forwards;
+}
+
+@keyframes splashOutlineFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.homepage-splash-outline-track {
+  fill: rgba(255, 255, 255, 0.15);
+}
+
+.homepage-splash-outline-fill {
+  fill: url(#splashOutlineGradient);
+  transition: clip-path 0.22s ease-out;
+}
+
+/* ─── Title ─────────────────────────────────────────────────────────────────── */
+
+.homepage-title {
+  font-family: var(--font-ui, system-ui, sans-serif);
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-primary, #e8e8f0);
+  opacity: 0;
+  transform: translateY(14px);
+  user-select: none;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* Visible: slides up and fades in — used for home-button re-entry */
+.homepage-title--visible {
+  opacity: 0.9;
+  transform: translateY(0);
+}
+
+/* Brighter text + shadow when a background image is behind */
+.homepage--has-bg .homepage-title--visible {
+  color: #f2f3f5;
+  text-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.85),
+    0 2px 10px rgba(0, 0, 0, 0.70);
+}
+
+/* Exit: fade out in place — no upward movement */
+.homepage-title--exit {
+  opacity: 0 !important;
+  transform: translateY(0) !important;
+}
+
+/* ─── Offline message ───────────────────────────────────────────────────────── */
+
+.homepage-offline-msg {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  opacity: 0;
+  margin-top: -18px; /* tighten gap with bar */
+  transition: opacity 0.4s ease;
+}
+
+.homepage-offline-msg--visible {
+  opacity: 1;
+}
+
+/* ─── Enter buttons ─────────────────────────────────────────────────────────── */
+
+.homepage-btn-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+}
+
+.homepage-btn-row {
+  display: flex;
+  flex-direction: row;
+  gap: 18px;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.homepage-btn-row--visible {
+  opacity: 1;
+}
+
+.homepage-btn-row--exit {
+  opacity: 0 !important;
+  transition: opacity 0.25s ease;
+}
+
+/* Apple-TV-style wide tile — rounded rectangle, not a pill/square icon.
+   Same 3-part hover pattern as the user's own onepage.me site: the image
+   zooms in (clipped to the tile's fixed frame via overflow:hidden, so the
+   TILE itself never changes size), a dark overlay fades in, and the label
+   (hidden at rest) fades in on top of it — so at rest it reads as pure
+   artwork, and hovering reveals what it actually links to. */
+.homepage-tile {
+  position: relative;
+  width: 198px;
+  height: 119px;
+  padding: 0;
+  border-radius: 18px;
+  background: var(--bg-elevated);
+  box-shadow: 8px 8px 4px rgba(0, 0, 0, 0.5);
+  cursor: var(--cur-pointer);
+}
+
+/* Clips the icon zoom/overlay/label to the tile's frame. Split out from
+   .homepage-tile itself so that .homepage-tile-ring (a sibling, not a
+   descendant of this wrapper) isn't also clipped — its stroke is centered
+   on the tile's true edge, so half its width needs to render outside the
+   tile's own box, which overflow:hidden on the tile would cut off. */
+.homepage-tile-clip {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+/* Gradient border ring — SVG <rect stroke> instead of a CSS masked
+   pseudo-element (same technique as the splash outline). SVG stroke follows
+   rounded corners natively. Sits directly on the button (not inside
+   .homepage-tile-clip), so its stroke isn't clipped by that wrapper's
+   overflow:hidden — inset:0 now maps 1:1 to the tile's true outer edge.
+   Always visible now, not just on hover. */
+.homepage-tile-ring {
+  position: absolute;
+  inset: -7px;
+  width: calc(100% + 14px);
+  height: calc(100% + 14px);
+  pointer-events: none;
+}
+
+.homepage-tile-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  transform: scale(1);
+  transition: transform 0.4s ease;
+}
+
+.homepage-tile:not(:disabled):hover .homepage-tile-bg {
+  transform: scale(1.15);
+}
+
+/* Wraps each icon so the idle float animation (transform: translateY/rotate,
+   below) doesn't fight over the `transform` property with the icon's own
+   hover-driven scale — animating the same property on the same element from
+   two different rules only lets one win. Positioned/sized like the old
+   .homepage-tile-icon used to be; the img inside just fills it. */
+.homepage-tile-icon-float {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  animation: homepageTileIconFloat 4.5s ease-in-out infinite;
+}
+
+@keyframes homepageTileIconFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-4px) rotate(1deg); }
+}
+
+.homepage-tile-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  transform: scale(var(--icon-scale, 1));
+  transition: transform 0.4s ease;
+}
+
+/* Gacha Tracker artwork reads slightly smaller than Showcases' at the same
+   base scale — nudged up so the two tiles feel visually matched at rest.
+   Hover multiplies on top of this via calc(), so the zoom-in stays 1.15x
+   relative to each icon's own base size, not a fixed absolute scale. */
+.homepage-tile-icon--tracker {
+  --icon-scale: 1.08;
+}
+
+.homepage-tile:not(:disabled):hover .homepage-tile-icon {
+  transform: scale(calc(var(--icon-scale, 1) * 1.15));
+}
+
+.homepage-tile-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  opacity: 0;
+  transition: opacity 0.25s ease, backdrop-filter 0.25s ease, -webkit-backdrop-filter 0.25s ease;
+  pointer-events: none;
+}
+
+.homepage-tile:not(:disabled):hover .homepage-tile-overlay {
+  opacity: 1;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.homepage-tile-label {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: translateY(-16px);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.homepage-tile:not(:disabled):hover .homepage-tile-label {
+  opacity: 1;
+}
+
+/* --label-font-size sets the BASE (rest) size only, per-instance (see
+   TileLabel in HomePage.js) — it no longer transitions itself. CSS
+   transitions on SVG <text> font-size are unreliable across browsers (glyphs
+   get re-rasterized each frame, which showed up here as the text looking
+   squished then snapping to its real size instead of growing smoothly).
+   transform:scale() below animates the same visual growth via a GPU matrix
+   transform instead, which SVG always animates smoothly. transform-box:
+   fill-box + transform-origin:center scales around the text's own middle
+   rather than the SVG viewport's origin. */
+.homepage-tile-label-text {
+  font-size: var(--label-font-size, 17px);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.25s ease;
+}
+
+/* Grows/shrinks in step with .homepage-tile-label-text's own transform
+   transition above — TileLabel (HomePage.js) precomputes the hover-size
+   target on mouseenter (scaling the rest-measured box by the same
+   HOVER_SCALE the CSS uses), so this just needs a matching transition to
+   animate toward that target in parallel with the text. */
+.homepage-tile-label-bg {
+  transition: x 0.25s ease, y 0.25s ease, width 0.25s ease, height 0.25s ease;
+}
+
+.homepage-tile:not(:disabled):hover .homepage-tile-label-text {
+  transform: scale(1.18);
+}
+
+.homepage-tile:disabled {
+  opacity: 0.5;
+  cursor: var(--cur-default);
+}
+
+/* Small reminder glyph shown only on hover, sitting just under the label —
+   teaches the same icon used for this page's cross-nav button in the
+   sidebar (see Sidebar.js/showcaseComponents.js/trackerComponents.js), so
+   the association reads before the user ever opens the sidebar. */
+.homepage-tile-glyph {
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%);
+  display: flex;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.homepage-tile:not(:disabled):hover .homepage-tile-glyph {
+  opacity: 1;
+}

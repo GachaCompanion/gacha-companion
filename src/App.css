@@ -1,0 +1,260 @@
+/* ─── Shared background layer — behind BOTH tracker and homepage ─────────────── */
+/* This is the only place backgrounds are rendered. Both .app and .homepage are  */
+/* transparent, so this layer shows through both seamlessly.                     */
+.app-bg-layer {
+  position: fixed;
+  inset: -2px; /* oversized by 2px so sub-pixel compositor shifts can't reach the edge */
+  z-index: 0;
+  background: var(--bg-base); /* fallback when no image is loaded */
+  overflow: hidden;
+  /* position:fixed escapes all parent overflow/clip-path — this element clips itself.
+     10px window radius + 2px inset offset = 12px to keep corners visually aligned. */
+  border-radius: 12px;
+}
+
+/* Background images/videos inside the layer */
+.app-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: opacity 0.3s ease;
+}
+
+/* Hide all backgrounds while the loading screen is active.
+   Removed once bgHidden goes false (timed to the deceleration phase of the title slide),
+   at which point the natural opacity transition fades the active background in. */
+.app-bg-layer--loading .app-bg {
+  opacity: 0 !important;
+  transition: none !important;
+}
+/* Videos use 0.001 instead of 0 — Chromium's "skip compositing" optimisation fires
+   only on exactly opacity:0. 0.001 keeps the GPU compositor pipeline active and
+   frames uploading throughout the loading phase, so the first reveal is lag-free.
+   0.001 is visually identical to 0: even pure white at 0.001 opacity contributes
+   only 0.255/255 to the pixel colour — below any perceptible threshold. */
+.app-bg-layer--loading .app-bg--video {
+  opacity: 0.001 !important;
+  /* translateZ(0) forces a dedicated GPU compositor layer — combined with non-zero opacity
+     this guarantees the GPU video decode pipeline is fully active during loading,
+     eliminating the cold-start lag on first background reveal. */
+  transform: translateZ(0) !important;
+  transition: none !important;
+}
+
+.app-bg--video {
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  object-fit: cover;
+  object-position: center;
+  transition: opacity 0.3s ease;
+  /* Always on a dedicated GPU compositor layer — combined with opacity:0.001 on inactive
+     videos, this keeps every video's GPU decode pipeline active at all times so any
+     background switch is lag-free (no cold-start re-upload on first reveal). */
+  transform: translateZ(0);
+}
+
+/* ─── App shell — transparent so the shared bg layer shows through ────────────── */
+.app {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+  z-index: 1; /* above bg-layer (z:0) */
+}
+
+/* Sidebar's wrapper — a normal (non-absolute) flex item of .app, sized by
+   .sidebar-layout's own 220/60px width, sitting beside .app-pages. Fades
+   in/out only when leaving/entering Home or Overview (neither has a
+   sidebar) — going directly between Tracker and Showcase never touches
+   this, since Sidebar is a single element that's never unmounted while
+   either is active (see shared/components/sidebar/Sidebar.js). Same
+   delayed-visibility pattern as .app-ui/.app-ui--hidden below, just not
+   absolutely positioned. */
+.sidebar-slot {
+  position: relative;
+  flex-shrink: 0;
+  transition: visibility 0s linear 0s;
+}
+.sidebar-slot--hidden {
+  visibility: hidden;
+  pointer-events: none;
+  transition: visibility 0s linear 0.5s;
+}
+
+/* Fades the sidebar out/in together with the rest of the page when going
+   to/from Home or Statistics (neither has a sidebar) — same 0.3s timing as
+   everything else, with visibility held until 0.5s so the fade has time to
+   finish before the slot actually stops rendering. The opacity transition
+   itself lives on .sidebar-layout in Sidebar.css (colocated with its other
+   transitions); this just triggers it. */
+.sidebar-slot--hidden .sidebar-layout {
+  opacity: 0;
+}
+
+/* Holds the stacked page bodies (Tracker/Showcase/Overview), to the right
+   of the sidebar slot. Fixed width (not flex:1) so toggling the sidebar's
+   collapsed state never reflows/resizes whichever page's main content is
+   showing. */
+.app-pages {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: calc(100% - 220px);
+}
+
+/* app-ui: one page's body — always at opacity 1 so backdrop-filter is       */
+/* always computed. Visibility controls hide/show; opacity lives on          */
+/* individual elements below so no ancestor-opacity kills backdrop-filter.   */
+.app-ui {
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 1;
+  transition: visibility 0s linear 0s;
+}
+
+/* Hidden while homepage is showing. Visibility deferred 0.5s so elements    */
+/* finish their opacity fade-out before the container becomes invisible.      */
+.app-ui--hidden {
+  visibility: hidden;
+  pointer-events: none;
+  transition: visibility 0s linear 0.5s;
+}
+
+/* ─── Per-element fade — tracker ↔ homepage crossfade ───────────────────────── */
+/* Each element fades via its own compositing layer. This avoids the Chromium   */
+/* optimisation that skips backdrop-filter rendering when an ancestor is        */
+/* opacity:0. Sidebar/panels are already composited; other elements are safe.  */
+.empty-state,
+.dashboard-icon,
+.resource-card, .income-panel, .total-bar, .pity-card, .stat-card, .pity-bar-wrap,
+.dashboard-title, .dashboard-settings-btn, .dashboard-tabs, .section-title,
+.history-filter-row, .history-summary, .history-table-wrap, .pl-list,
+.history-filter-btn, .history-dropdowns, .pl-banner-bar, .pl-header-row, .pl-filter-right, .pl-rarity-btn, .pl-banner-btn, .pl-banner-panel,
+.gc-panel, .hc-panel, .zc-panel,
+.gc-results-panel, .hc-results-panel, .zc-results-panel,
+.wishlist-entry, .wishlist-labels-bar,
+.wishlist-labels-hint, .wishlist-label-btn, .wishlist-labels-sep,
+.wishlist-add-btn, .wishlist-header-row > div {
+  transition: opacity 0.25s ease;
+}
+
+.app-ui--hidden .empty-state,
+.app-ui--hidden .dashboard-icon,
+.app-ui--hidden .resource-card, .app-ui--hidden .income-panel,
+.app-ui--hidden .total-bar, .app-ui--hidden .pity-card,
+.app-ui--hidden .stat-card, .app-ui--hidden .pity-bar-wrap,
+.app-ui--hidden .dashboard-title, .app-ui--hidden .dashboard-settings-btn,
+.app-ui--hidden .dashboard-tabs, .app-ui--hidden .section-title,
+.app-ui--hidden .history-filter-row, .app-ui--hidden .history-summary,
+.app-ui--hidden .history-table-wrap, .app-ui--hidden .pl-list, .app-ui--hidden .pl-scroll-area,
+.app-ui--hidden .history-filter-btn, .app-ui--hidden .history-dropdowns, .app-ui--hidden .pl-banner-bar,
+.app-ui--hidden .pl-header-row, .app-ui--hidden .pl-filter-right,
+.app-ui--hidden .pl-rarity-btn, .app-ui--hidden .pl-banner-btn, .app-ui--hidden .pl-banner-panel,
+.app-ui--hidden .gc-panel, .app-ui--hidden .hc-panel, .app-ui--hidden .zc-panel,
+.app-ui--hidden .gc-results-panel, .app-ui--hidden .hc-results-panel, .app-ui--hidden .zc-results-panel,
+.app-ui--hidden .wishlist-entry, .app-ui--hidden .wishlist-labels-bar,
+.app-ui--hidden .wishlist-labels-hint, .app-ui--hidden .wishlist-label-btn,
+.app-ui--hidden .wishlist-labels-sep, .app-ui--hidden .wishlist-add-btn,
+.app-ui--hidden .wishlist-header-row > div {
+  opacity: 0;
+}
+
+/* Custom scrollbar tracks fade with the same timing as other tracker elements. */
+.sa-track { transition: opacity 0.25s ease; }
+.app-ui--hidden .sa-track { opacity: 0; }
+
+/* Showcase section fades with the same timing */
+.showcase-main { transition: opacity 0.25s ease; }
+.app-ui--hidden .showcase-main { opacity: 0; }
+
+/* Overview (Statistics) page fades with the same timing */
+.overview-main { transition: opacity 0.25s ease; }
+.app-ui--hidden .overview-main { opacity: 0; }
+
+/* Fade the tracker TitleBar background — buttons stay at opacity 1 so they
+   never disappear, but the panel behind them smoothly transitions away. */
+.app-ui--hidden .title-bar { background: transparent; }
+
+.app-right {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  background: var(--bg-base);
+  zoom: var(--text-zoom, 1);
+  scrollbar-gutter: stable;
+}
+
+html.has-bg .app-main { background: transparent; }
+
+/* ─── Text readability over backgrounds ──────────────────────────────────────── */
+
+/* Mild shadow cascade for all app-right content — gives text a subtle lift over
+   background images. Components opt out or override in their own CSS files. */
+html.has-bg .app-right {
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.75);
+}
+
+/* ─── Vignette — on the shared bg layer so it shows in both tracker and home ──── */
+
+html.has-bg .app-bg-layer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 55% 50%, transparent 15%, rgba(0, 0, 0, 0.40) 55%, rgba(0, 0, 0, 0.78) 100%);
+}
+
+/* Shared button styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s, opacity 0.15s;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+.btn-primary:hover { opacity: 0.85; }
+
+.btn-ghost {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.btn-danger {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+.btn-danger:hover { background: rgba(224, 92, 110, 0.1); }
+

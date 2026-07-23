@@ -1,0 +1,462 @@
+/* ─── Card shell ─────────────────────────────────────────────────────────────── */
+
+.char-card {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  position: relative;
+  background: #1a1610;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Namecard background — blurred, darkened, full-card */
+.char-card__bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(18px) brightness(0.28);
+  transform: scale(1.08); /* prevent blur edge bleed */
+  z-index: 0;
+}
+
+/* Rarity tint — overlaid on top of the blurred bg */
+.char-card--r5::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 20% 100%, rgba(180,130,40,0.18) 0%, transparent 65%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.char-card--r4::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 20% 100%, rgba(110,70,180,0.18) 0%, transparent 65%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* All direct children sit above the bg layers */
+.char-card__left,
+.char-card__center,
+.char-card__right {
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── LEFT column (~28%) ─────────────────────────────────────────────────────── */
+
+.char-card__left {
+  width: 28%;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* Design Rule 4: portrait bottom-anchored, object-position center top */
+.char-card__portrait {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+/* Constellation icons — far left edge, vertically stacked (Design Rule 8) */
+.char-card__consts {
+  position: absolute;
+  left: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 2;
+}
+
+.char-card__const {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  overflow: hidden;
+  opacity: 0.35;
+  background: rgba(0,0,0,0.5);
+}
+
+.char-card__const--unlocked {
+  opacity: 1;
+}
+
+.char-card__const img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Talent badges (Design Rule 8) — over lower portrait */
+.char-card__talents {
+  position: absolute;
+  bottom: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+/* Name + level — gradient overlay at card bottom */
+.char-card__identity {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px 10px 8px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.72));
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.char-card__name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.char-card__level {
+  font-size: 10px;
+  color: rgba(255,255,255,0.75);
+  font-weight: 500;
+}
+
+.char-card__friendship {
+  font-size: 10px;
+  color: rgba(255,255,255,0.6);
+  font-weight: 500;
+}
+
+
+.char-card__char-stars {
+  font-size: 9px;
+  color: #e8b84b;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+/* ─── CENTER column (~38%) ───────────────────────────────────────────────────── */
+
+.char-card__center {
+  width: 38%;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 14px;
+  border-left: 1px solid rgba(255,255,255,0.07);
+  border-right: 1px solid rgba(255,255,255,0.07);
+  overflow: hidden;
+  flex-shrink: 0;
+  background: rgba(0,0,0,0.35);
+}
+
+/* ── Weapon block (Design Rule 6) ── */
+
+.weapon-block {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.weapon-block--empty {
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+}
+
+.weapon-block__header {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.weapon-block__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  object-fit: contain;
+  background: rgba(255,255,255,0.06);
+  flex-shrink: 0;
+}
+
+.weapon-block__info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.weapon-block__name {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.92);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.weapon-block__stars {
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  display: flex;
+}
+
+.weapon-block__star { color: rgba(255,255,255,0.15); }
+.weapon-block__star--lit { color: #e8b84b; }
+
+/* ── Stat rows (Design Rule 7) ── */
+
+.char-card__stats {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  overflow: hidden;
+}
+
+.char-card__stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1px 0;
+}
+
+.char-card__stat-label {
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  flex: 1;
+}
+
+.char-card__stat-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.92);
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.char-card__stat-row--dmg .char-card__stat-value {
+  color: #e8c97a;
+}
+
+/* ── Artifact set tags ── */
+
+.char-card__sets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+  flex-shrink: 0;
+}
+
+.char-card__set-tag {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.55);
+  white-space: nowrap;
+}
+
+/* ─── RIGHT column (~34%) ────────────────────────────────────────────────────── */
+
+.char-card__right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 10px;
+  gap: 3px;
+  overflow: hidden;
+  min-width: 0;
+  background: rgba(0,0,0,0.25);
+}
+
+/* ─── Artifact slot (Design Rule 5) ─────────────────────────────────────────── */
+
+.artifact-slot {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding-bottom: 3px;
+}
+
+.artifact-slot:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.artifact-slot--empty {
+  justify-content: center;
+}
+
+.artifact-slot__empty-label {
+  font-size: 10px;
+  color: rgba(255,255,255,0.2);
+}
+
+.artifact-slot__thumb-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  flex-shrink: 0;
+}
+
+.artifact-slot__icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.06);
+}
+
+.artifact-slot__meta {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.artifact-slot__stars {
+  display: flex;
+  line-height: 1;
+}
+
+.artifact-slot__star {
+  font-size: 7px;
+  color: #e8b84b;
+}
+
+.artifact-slot__level {
+  font-size: 8px;
+  color: rgba(255,255,255,0.4);
+  font-weight: 600;
+}
+
+.artifact-slot__main {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.artifact-slot__main-value {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.92);
+  flex-shrink: 0;
+}
+
+/* 2×2 substat grid (Design Rule 5) */
+.artifact-slot__substats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px 6px;
+}
+
+.artifact-slot__sub {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.artifact-slot__sub--empty {
+  visibility: hidden;
+}
+
+.artifact-slot__sub-value {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.65);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Resolution error state ── */
+
+.char-card--error {
+  align-items: center;
+  justify-content: center;
+}
+
+.char-card__error-msg {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 24px;
+  line-height: 1.6;
+  border: 1px dashed var(--border-bright);
+  border-radius: var(--radius-sm);
+}
+
+/* Set tags pushed to top when no stats section */
+.char-card__sets--flush {
+  margin-top: 0;
+}
+
+/* ─── Talent badges (Design Rule 8) ─────────────────────────────────────────── */
+
+.talent-row {
+  display: flex;
+  gap: 6px;
+}
+
+.talent-badge {
+  position: relative;
+  width: 28px;
+  height: 28px;
+}
+
+.talent-badge__icon {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  background: rgba(0,0,0,0.5);
+}
+
+.talent-badge__level {
+  position: absolute;
+  bottom: -2px;
+  right: -4px;
+  font-size: 9px;
+  font-weight: 700;
+  background: rgba(10,8,6,0.85);
+  color: rgba(255,255,255,0.85);
+  border-radius: 99px;
+  padding: 0 3px;
+  line-height: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.talent-badge--boosted .talent-badge__level {
+  background: #c8832a;
+  color: #fff;
+  border-color: transparent;
+}

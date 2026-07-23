@@ -1,0 +1,95 @@
+.title-bar {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  background: var(--titlebar-bg);
+  transition: background 0.3s ease;
+  /* No drag on the parent — drag lives only on .title-bar-drag so the OS
+     cursor override doesn't bleed into the controls area */
+  user-select: none;
+}
+
+.title-bar-drag {
+  flex: 1;
+  height: 100%;
+}
+
+/* Single always-mounted controls overlay — sits above both homepage and tracker */
+.title-bar-controls--fixed {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 44px;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  padding: 0 6px 0 4px;
+  gap: 2px;
+  pointer-events: auto;
+}
+
+.title-bar-controls {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 6px 0 4px;
+  gap: 2px;
+}
+
+/* Profile/Settings/Minimize fade in together with the homepage menu buttons
+   (see HomePage.js's onMenuVisible) — Close stays out of this group so the
+   window can always be closed, even while the home screen is still loading. */
+.title-bar-controls--fade {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.title-bar-controls--fade-visible { opacity: 1; }
+
+.title-bar-btn {
+  width: 40px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  transition: background 0.12s, color 0.12s;
+}
+
+.title-bar-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+.title-bar-btn--close:hover { background: var(--danger); color: #fff; }
+
+.title-bar-profile-btn {
+  width: auto;
+  max-width: 130px;
+  padding: 0 10px;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.title-bar-profile-btn span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ─── Background image readability ───────────────────────────────────────────── */
+
+html.has-bg .title-bar-btn {
+  color: #f2f3f5;
+  text-shadow:
+    0 1px 5px rgba(0, 0, 0, 0.92),
+    0 2px 10px rgba(0, 0, 0, 0.78),
+    0 3px 16px rgba(0, 0, 0, 0.55);
+}
+html.has-bg .title-bar-btn svg {
+  filter:
+    drop-shadow(0 1px 5px rgba(0, 0, 0, 1))
+    drop-shadow(0 1px 5px rgba(0, 0, 0, 1))
+    drop-shadow(0 2px 10px rgba(0, 0, 0, 1));
+}

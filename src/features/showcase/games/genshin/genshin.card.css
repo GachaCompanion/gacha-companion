@@ -1,0 +1,650 @@
+/* ============================================================
+   GENSHIN IMPACT — CharacterCard standalone styles
+   All structural + visual styles for the Genshin card.
+   Do not import CharacterCard.css alongside this file.
+   ============================================================ */
+
+/* ─── Card shell ─────────────────────────────────────────────────────────────── */
+
+.char-card {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  position: relative;
+  background: #1a1610;
+  border: 1px solid rgba(255,255,255,0.08);
+  font-family: 'Lato', serif;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 3px 4px rgba(0,0,0,1);
+}
+
+/* Namecard background — blurred, darkened, full-card */
+.char-card__bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(6px) brightness(0.5);
+  transform: scale(1.08);
+  z-index: 0;
+}
+
+/* Vignette overlay — above images (z-index 1), below UI (z-index 3) */
+.char-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to right,  rgba(0,0,0,0.425) 0%, transparent 30%),
+    linear-gradient(to left,   rgba(0,0,0,0.425) 0%, transparent 30%),
+    linear-gradient(to bottom, rgba(0,0,0,0.425) 0%, transparent 30%),
+    linear-gradient(to top,    rgba(0,0,0,0.425) 0%, transparent 30%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Rarity tint overlay */
+.char-card--r5::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 20% 100%, rgba(180,130,40,0.18) 0%, transparent 65%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.char-card--r4::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 20% 100%, rgba(110,70,180,0.18) 0%, transparent 65%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Columns — no z-index so they don't form stacking contexts;
+   individual elements inside are layered explicitly */
+.char-card__left,
+.char-card__center,
+.char-card__right {
+  position: relative;
+}
+
+/* ─── LEFT column (~28%) ─────────────────────────────────────────────────────── */
+
+.char-card__left {
+  width: 34%;
+  position: relative;
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+.char-card__portrait {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 160%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 70% top;
+  display: block;
+  transform: scale(1.15);
+  transform-origin: center top;
+  -webkit-mask-image: linear-gradient(to right, black 55%, transparent 85%);
+  mask-image: linear-gradient(to right, black 55%, transparent 85%);
+}
+
+/* Constellation icons — left edge, full height, inverted arc */
+.char-card__consts {
+  position: absolute;
+  left: 8px;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+  align-items: flex-start;
+  padding: 16px 0;
+  z-index: 3;
+}
+
+/* Inverted arc: top/bottom extend right, middle stays left */
+.char-card__consts .char-card__const:nth-child(1) { margin-left: 34px; }
+.char-card__consts .char-card__const:nth-child(2) { margin-left: 18px; }
+.char-card__consts .char-card__const:nth-child(3) { margin-left: 10px; }
+.char-card__consts .char-card__const:nth-child(4) { margin-left: 10px; }
+.char-card__consts .char-card__const:nth-child(5) { margin-left: 18px; }
+.char-card__consts .char-card__const:nth-child(6) { margin-left: 34px; }
+
+.char-card__const {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  opacity: 0.85;
+  background: var(--elem-color-bg);
+  filter: none;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1.5px var(--elem-color-solid), 0 0 6px 1px var(--elem-color-glow);
+}
+
+.char-card__const--locked {
+  opacity: 0.45;
+  filter: grayscale(0.5);
+  box-shadow: none;
+}
+
+.char-card__const--unlocked {
+  opacity: 1;
+  box-shadow: 0 0 0 1.5px rgba(255,255,255,0.6), 0 0 0 2.5px var(--elem-color-solid), 0 0 14px 4px var(--elem-color-glow);
+}
+
+.char-card--elem-pyro    { --elem-color-solid: rgba(255,100,50,0.85);  --elem-color-glow: rgba(255,100,50,0.4);  --elem-color-bg: rgb(28,6,2); }
+.char-card--elem-hydro   { --elem-color-solid: rgba(30,160,255,0.85);  --elem-color-glow: rgba(30,160,255,0.4);  --elem-color-bg: rgb(1,12,30); }
+.char-card--elem-anemo   { --elem-color-solid: rgba(80,210,180,0.85);  --elem-color-glow: rgba(80,210,180,0.4);  --elem-color-bg: rgb(3,18,14); }
+.char-card--elem-electro { --elem-color-solid: rgba(180,100,255,0.85); --elem-color-glow: rgba(180,100,255,0.4); --elem-color-bg: rgb(14,4,26); }
+.char-card--elem-cryo    { --elem-color-solid: rgba(140,210,255,0.85); --elem-color-glow: rgba(140,210,255,0.4); --elem-color-bg: rgb(4,14,28); }
+.char-card--elem-geo     { --elem-color-solid: rgba(220,170,40,0.85);  --elem-color-glow: rgba(220,170,40,0.4);  --elem-color-bg: rgb(22,13,1); }
+.char-card--elem-dendro  { --elem-color-solid: rgba(100,200,60,0.85);  --elem-color-glow: rgba(100,200,60,0.4);  --elem-color-bg: rgb(5,18,2); }
+
+.char-card__const img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Talent badges — right edge of left column, vertically centered */
+.char-card__talents {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+}
+
+.char-card__talents .talent-row {
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Identity — absolute overlay spanning left + center columns (64% of card) */
+.char-card__identity {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  width: 64%;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 0 12px 8px;
+}
+
+.char-card__identity-line {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.char-card__name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  flex-shrink: 0;
+}
+
+.char-card__identity-sep {
+  font-size: 13px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.char-card__level {
+  font-size: 13px;
+  color: #fff;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.char-card__friendship {
+  font-size: 13px;
+  color: #fff;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.char-card__char-stars {
+  font-size: 11px;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+
+.char-card--r5 .char-card__char-stars { color: #e8b84b; }
+.char-card--r4 .char-card__char-stars { color: #c080e0; }
+
+/* ─── CENTER column (~38%) ───────────────────────────────────────────────────── */
+
+.char-card__center {
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+  padding: 58px 12px 10px;
+  flex-shrink: 0;
+  background: transparent;
+  position: relative;
+  z-index: 2;
+}
+
+/* ── Weapon block ── */
+
+.weapon-block {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+}
+
+.weapon-block--empty {
+  font-size: 13px;
+  color: #fff;
+}
+
+.weapon-block__header {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.weapon-block__icon {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.7));
+  position: relative;
+  z-index: 1;
+}
+
+.weapon-block__info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  flex: 1;
+  position: relative;
+  z-index: 3;
+}
+
+.weapon-block__name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  white-space: normal;
+  line-height: 1.3;
+  margin-top: 5px;
+  text-align: center;
+  position: relative;
+  z-index: 3;
+}
+
+/* ATK + substat pill badges */
+.weapon-block__badges {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.weapon-block__badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* R5 / Lv chips */
+.weapon-block__sep {
+  font-size: 12px;
+  color: #fff;
+}
+
+.weapon-block__chips {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.weapon-block__chip {
+  font-size: 11px;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.weapon-block__stars {
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+.weapon-block__stars--r5 { color: #e8b84b; }
+.weapon-block__stars--r4 { color: #c080e0; }
+.weapon-block__stars--r3 { color: #6090e0; }
+
+/* ── Stat rows ── */
+
+.char-card__stats {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  min-height: 0;
+  position: relative;
+  z-index: 3;
+}
+
+.char-card__stat-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  justify-content: space-between;
+  padding: 2px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.char-card__stat-label {
+  font-size: 13px;
+  color: #fff;
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.char-card__stat-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+  text-align: right;
+  position: relative;
+  z-index: 1;
+}
+
+.char-card__stat-row--dmg .char-card__stat-value {
+  color: #e8c97a;
+}
+
+/* ── Artifact set tags ── */
+
+.char-card__sets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 10px;
+  flex-shrink: 0;
+  justify-content: center;
+  position: relative;
+  z-index: 3;
+}
+
+.char-card__sets--flush {
+  margin-top: 0;
+}
+
+.char-card__set-tag {
+  font-size: 12px;
+  padding: 3px 9px;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* ─── RIGHT column (~34%) ────────────────────────────────────────────────────── */
+
+.char-card__right {
+  width: 36%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  gap: 0;
+  overflow: hidden;
+}
+
+/* ─── Artifact slots ─────────────────────────────────────────────────────────── */
+
+.artifact-slot {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 0;
+}
+
+/* Arc layout — only the icon shifts, substats stay straight.
+   Scoped to .char-card__right — .artifact-slot is a shared component class
+   also used by HSR/ZZZ cards, and this rule used to leak into their layouts
+   unscoped, staggering discs/artifacts that were never meant to be offset. */
+.char-card__right .artifact-slot:nth-child(1) .artifact-slot__thumb-col { margin-left: 0px; }
+.char-card__right .artifact-slot:nth-child(2) .artifact-slot__thumb-col { margin-left: 16px; }
+.char-card__right .artifact-slot:nth-child(3) .artifact-slot__thumb-col { margin-left: 24px; }
+.char-card__right .artifact-slot:nth-child(4) .artifact-slot__thumb-col { margin-left: 16px; }
+.char-card__right .artifact-slot:nth-child(5) .artifact-slot__thumb-col { margin-left: 0px; }
+
+.artifact-slot--empty {
+  justify-content: center;
+}
+
+.artifact-slot__empty-label {
+  font-size: 12px;
+  color: #fff;
+}
+
+/* Icon column — fills slot height, fades right */
+.artifact-slot__thumb-col {
+  position: relative;
+  flex-shrink: 0;
+  width: 72px;
+  align-self: stretch;
+}
+
+.artifact-slot__icon {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  position: relative;
+  z-index: 1;
+}
+
+/* Overlay: main stat value + stars + level at bottom of icon */
+.artifact-slot__overlay {
+  position: absolute;
+  bottom: 0;
+  left: 30%;
+  right: 0;
+  z-index: 3;
+  padding: 4px 2px 2px;
+  background: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.artifact-slot__main-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.artifact-slot__main-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.1;
+  white-space: nowrap;
+  text-shadow: 0 3px 4px rgba(0,0,0,1), 0 0 5px rgba(0,0,0,1), 0 0 5px rgba(0,0,0,1);
+  position: relative;
+  z-index: 1;
+}
+
+.artifact-slot__meta {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.artifact-slot__stars {
+  display: flex;
+  line-height: 1;
+}
+
+.artifact-slot__star {
+  font-size: 7px;
+  color: #e8b84b;
+  text-shadow: 0 3px 4px rgba(0,0,0,1), 0 0 5px rgba(0,0,0,1), 0 0 5px rgba(0,0,0,1);
+  position: relative;
+  z-index: 1;
+}
+
+.artifact-slot__level {
+  font-size: 9px;
+  color: #fff;
+  font-weight: 600;
+  text-shadow: 0 3px 4px rgba(0,0,0,1), 0 0 5px rgba(0,0,0,1), 0 0 5px rgba(0,0,0,1);
+  position: relative;
+  z-index: 1;
+}
+
+/* Substats — 2-column grid of [icon value] pairs.
+   Scoped to .char-card__right — .artifact-slot__substats is a shared component
+   class also used by HSR/ZZZ cards. This used to leak in unscoped, silently
+   absolute-positioning their substats grids (position/left/right aren't set by
+   their own overrides, so this rule won per-property despite lower specificity
+   on the rule as a whole) regardless of any flex/gap changes made there. */
+.char-card__right .artifact-slot__substats {
+  position: absolute;
+  left: 100px;
+  right: 8px;
+  top: 0;
+  bottom: 0;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 5px 8px;
+  align-content: center;
+  align-items: center;
+  padding-left: 12px;
+}
+
+.artifact-slot__sub-pair {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.artifact-slot__sub-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.artifact-slot__sub--empty {
+  visibility: hidden;
+}
+
+.artifact-slot__sub-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* ─── Talent badges ──────────────────────────────────────────────────────────── */
+
+.talent-row {
+  display: flex;
+  gap: 8px;
+}
+
+.talent-badge {
+  position: relative;
+  width: 36px;
+  height: 36px;
+}
+
+.talent-badge__icon {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  background: rgba(0,0,0,0.5);
+}
+
+.talent-badge__level {
+  position: absolute;
+  bottom: -2px;
+  right: -5px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(10,8,6,0.85);
+  color: #fff;
+  border-radius: 99px;
+  padding: 0 4px;
+  line-height: 16px;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.talent-badge--boosted .talent-badge__level {
+  background: #c8832a;
+  color: #fff;
+  border-color: transparent;
+}
+
+/* Drop shadow on SVG icons and image icons */
+.char-card svg,
+.char-card__const img,
+.char-card .talent-badge__icon {
+  filter: drop-shadow(0 3px 4px rgba(0,0,0,1));
+}
+
+/* Extra glow shadow on main stat icon sitting over the artifact image */
+.artifact-slot__overlay svg {
+  filter: drop-shadow(0 3px 4px rgba(0,0,0,1)) drop-shadow(0 0 5px rgba(0,0,0,1)) drop-shadow(0 0 5px rgba(0,0,0,1));
+}
+
+/* ─── Error state ────────────────────────────────────────────────────────────── */
+
+.char-card--error {
+  align-items: center;
+  justify-content: center;
+}
+
+.char-card__error-msg {
+  font-size: 14px;
+  color: #fff;
+  text-align: center;
+  padding: 24px;
+  line-height: 1.6;
+  border: 1px dashed rgba(255,255,255,0.2);
+  border-radius: var(--radius-sm);
+}

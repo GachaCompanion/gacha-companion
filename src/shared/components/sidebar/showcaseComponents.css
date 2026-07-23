@@ -1,0 +1,108 @@
+/* Round character icons in the showcase sidebar */
+.showcase-sidebar-build-icon {
+  border-radius: 50% !important;
+  overflow: hidden;
+  padding: 0;
+  background: var(--bg-elevated) !important;
+}
+
+.showcase-sidebar-build-icon .sidebar-item-icon-img {
+  border-radius: 50%;
+  object-position: center top;
+}
+
+.showcase-sidebar-build-icon__fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* Inline save input row in the footer */
+.showcase-sidebar-save-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+}
+
+.showcase-sidebar-save-input {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--accent);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  outline: none;
+}
+
+.showcase-sidebar-save-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Inline confirm/cancel buttons (used in footer save row and item rename) */
+.showcase-sidebar-inline-btn {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  transition: background 0.12s, color 0.12s;
+  cursor: var(--cur-pointer);
+}
+
+.showcase-sidebar-inline-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.showcase-sidebar-inline-btn--confirm:hover:not(:disabled) {
+  color: var(--accent);
+}
+
+.showcase-sidebar-inline-btn:disabled {
+  opacity: 0.35;
+  cursor: var(--cur-default);
+}
+
+/* Item row in inline-edit mode */
+.showcase-sidebar-item-row--editing {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 4px;
+  border-radius: var(--radius-sm);
+}
+
+.showcase-sidebar-edit-input {
+  flex: 1;
+  min-width: 0;
+  height: 26px;
+  padding: 0 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--accent);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  outline: none;
+}
+
+/* Disabled "Save Build" button */
+.sidebar-add:disabled {
+  opacity: 0.45;
+  cursor: var(--cur-default);
+  pointer-events: none;
+}

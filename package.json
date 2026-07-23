@@ -1,0 +1,97 @@
+{
+  "name": "gacha-companion",
+  "version": "1.0.0",
+  "description": "Personal gacha game companion",
+  "main": "electron/main.js",
+  "homepage": "./",
+  "scripts": {
+    "react-build": "react-scripts build",
+    "start": "electron .",
+    "build-exe": "npm run react-build && electron-builder --win --x64",
+    "publish": "npm run react-build && electron-builder --win --x64 --publish always",
+    "dev": "concurrently \"cross-env BROWSER=none react-scripts start\" \"wait-on http://localhost:3000 && electron .\""
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.1.0",
+    "@dnd-kit/sortable": "^8.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "@esotericsoftware/spine-canvas": "~4.1.0",
+    "@esotericsoftware/spine-webgl": "~4.1.0",
+    "@napi-rs/canvas": "^1.0.1",
+    "adm-zip": "^0.5.18",
+    "genshin-db": "^5.2.11",
+    "koffi": "^3.0.2",
+    "lucide-react": "^0.383.0",
+    "lz-string": "^1.5.0",
+    "motion": "^12.40.0",
+    "onnxruntime-node": "^1.27.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "sharp": "^0.35.2",
+    "starrail.js": "^1.9.10",
+    "tesseract.js": "^7.0.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^4.0.6",
+    "concurrently": "^8.2.0",
+    "cross-env": "^7.0.3",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.6.4",
+    "playwright-core": "^1.60.0",
+    "pngjs": "^7.0.0",
+    "wait-on": "^7.2.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version"
+    ]
+  },
+  "build": {
+    "appId": "com.you.gacha-companion",
+    "productName": "Gacha Companion",
+    "extraMetadata": {
+      "main": "electron/main.js"
+    },
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "build/**/*",
+      "electron/**/*",
+      "src/features/gacha-tracker/engine/pullLogBackup.js",
+      "node_modules/genshin-db/**/*",
+      "node_modules/xlsx/**/*",
+      "node_modules/lz-string/**/*",
+      "node_modules/starrail.js/**/*"
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "GachaCompanion",
+      "repo": "gacha-companion",
+      "releaseType": "release"
+    },
+    "win": {
+      "icon": "src/assets/icon/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "GachaCompanion-Setup.exe"
+    }
+  }
+}

@@ -1,0 +1,171 @@
+.uid-lookup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.uid-lookup__form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  position: relative;
+}
+
+/* ── Game selector ─────────────────────────────────────────────────────────── */
+
+.uid-lookup__game-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.uid-lookup__game-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: var(--cur-pointer);
+  white-space: nowrap;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.uid-lookup__game-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--bg-hover);
+}
+
+.uid-lookup__game-btn:disabled {
+  opacity: 0.5;
+  cursor: var(--cur-default);
+}
+
+.uid-lookup__chevron {
+  transition: transform 0.15s;
+  color: var(--text-muted);
+}
+
+.uid-lookup__chevron--open {
+  transform: rotate(180deg);
+}
+
+.uid-lookup__dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  z-index: 50;
+  list-style: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+
+.uid-lookup__dropdown-item {
+  padding: 9px 14px;
+  font-size: 13px;
+  color: var(--text-primary);
+  cursor: var(--cur-pointer);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  transition: background 0.1s;
+  white-space: nowrap;
+}
+
+.uid-lookup__dropdown-item:hover:not(.uid-lookup__dropdown-item--disabled) {
+  background: var(--bg-hover);
+}
+
+.uid-lookup__dropdown-item--active {
+  color: var(--accent);
+}
+
+.uid-lookup__dropdown-item--disabled {
+  color: var(--text-muted);
+  cursor: var(--cur-default);
+}
+
+.uid-lookup__soon {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 99px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+/* ── UID input ─────────────────────────────────────────────────────────────── */
+
+.uid-lookup__input {
+  flex: 1;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.uid-lookup__input:focus {
+  border-color: var(--accent);
+}
+
+.uid-lookup__input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ── Search button ─────────────────────────────────────────────────────────── */
+
+.uid-lookup__btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: var(--cur-pointer);
+  transition: opacity 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.uid-lookup__btn:disabled {
+  opacity: 0.5;
+  cursor: var(--cur-default);
+}
+
+.uid-lookup__btn:not(:disabled):hover {
+  opacity: 0.85;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.uid-lookup__spinner {
+  animation: spin 0.8s linear infinite;
+}
+
+/* ── Error ─────────────────────────────────────────────────────────────────── */
+
+.uid-lookup__error {
+  font-size: 12px;
+  color: var(--danger);
+  font-weight: 500;
+}

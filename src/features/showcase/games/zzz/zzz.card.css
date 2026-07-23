@@ -1,0 +1,704 @@
+/* ============================================================
+   ZENLESS ZONE ZERO — CharacterCard standalone styles.
+   Do not import CharacterCard.css alongside this file.
+   ============================================================ */
+
+.zzz-card {
+  --zzz-accent: #ffe471;          /* New Eridu neon yellow */
+  --zzz-accent-2: #ff3d7f;        /* magenta */
+
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  border-radius: 0;
+  background: #0c0c11;
+  border: 1px solid rgba(255,255,255,0.08);
+  font-family: 'Lato', system-ui, sans-serif;
+  font-weight: 700;
+  font-style: normal;
+  color: #ddd;
+}
+
+/* --zzz-elem-dark for the name/level/mindscape 3D text effect's shadow layer
+   is set as an inline style by ZzzCard.js, derived per-character from that
+   element's own icon gradient (see ZzzElementIcon.js's getZzzElementColor)
+   — not a static class here. */
+
+/* Lowest layer of the card — below even the namecard bg image. Elongated
+   diamond texture (matches the in-game panel background) + a vertical fade.
+   The diamonds need their OWN independent fade (different colors than the
+   gap background), which a single repeating tile can't do by itself — so the
+   diamond shape is used as a mask (::before) over its own gradient, layered
+   on top of the base gradient. */
+.zzz-card__texture {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: #121111; /* TEST: flat color, no gradient, to isolate contrast-vs-bug */
+}
+.zzz-card__texture::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #0c0b0b; /* TEST: flat color, no gradient, to isolate contrast-vs-bug */
+  /* Straight columns of diamonds, alternating columns offset by half a cell.
+     BOTH columns baked into ONE self-contained SVG (single mask layer, no
+     mask-position offsetting) — a two-layer version rendered the offset
+     layer at a consistently different apparent size than the first, which
+     points to the two layers rasterizing at different sub-pixel alignments.
+     One tile, one rasterization pass, no drift. */
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'14'%20height%3D'16'%3E%3Cpolygon%20points%3D'3.5%2C1.00%205.50%2C4%203.5%2C7.00%201.50%2C4'%20fill%3D'white'%2F%3E%3Cpolygon%20points%3D'10.5%2C9.00%2012.50%2C12%2010.5%2C15.00%208.50%2C12'%20fill%3D'white'%2F%3E%3C%2Fsvg%3E");
+  mask-repeat: repeat;
+  mask-size: 14px 16px;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'14'%20height%3D'16'%3E%3Cpolygon%20points%3D'3.5%2C1.00%205.50%2C4%203.5%2C7.00%201.50%2C4'%20fill%3D'white'%2F%3E%3Cpolygon%20points%3D'10.5%2C9.00%2012.50%2C12%2010.5%2C15.00%208.50%2C12'%20fill%3D'white'%2F%3E%3C%2Fsvg%3E");
+  -webkit-mask-repeat: repeat;
+  -webkit-mask-size: 14px 16px;
+}
+
+.zzz-card__bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: none;
+  z-index: 0;
+}
+
+.zzz-card__left,
+.zzz-card__center,
+.zzz-card__right {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── LEFT column: the character ──────────────────────────────────────────── */
+
+.zzz-card__left {
+  width: 28%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5px 5px 0 0;
+  gap: 8px;
+}
+
+/* PNG mode — portrait fills the left column like Genshin. */
+.zzz-card--png .zzz-card__left {
+  overflow: visible;
+}
+
+.zzz-card__portrait {
+  --portrait-w: 150%;
+  position: absolute;
+  top: 0;
+  left: max(50%, calc(var(--portrait-w) * 0.3));
+  transform: translateX(-50%);
+  width: var(--portrait-w);
+  height: var(--portrait-w);
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+  z-index: 1;
+}
+
+/* Spans the FULL card (sibling of .zzz-card__left/center/right, not nested
+   inside them) so the Live2D character is never clipped by a column boundary
+   — it bleeds rightward into center (and beyond, if the pose is wide) exactly
+   as far as it naturally extends. Placed before .zzz-card__left/center/right
+   in DOM order so they still paint on top of the bleed in their own regions
+   (same z-index tier; equal z-index stacks in DOM order). */
+.zzz-card__live2d-clip {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* Live2D canvas — fills the full card (non-square). The engine widens the
+   camera's horizontal field of view to match this shape, so the vertical
+   framing (ZZZ_FIT_TOP_FRAC / ZZZ_TOP_SPAN_FRAC) is unaffected. */
+.zzz-card__live2d {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ── Name box — overlaid at the bottom of the left column ────────────────── */
+
+.zzz-card__screen-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: 13px 16px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+}
+
+.zzz-card__identity {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+}
+
+.zzz-card__elem-icon,
+.zzz-card__prof-icon {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  flex-shrink: 0;
+  /* Same offset as .zzz-card__name's 3D text shadow, for visual consistency
+     with the text sitting right next to these icons in the identity row. */
+  filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.6));
+}
+
+.zzz-card__name {
+  flex: 1;
+  min-width: 0;
+  font-size: 25px;
+  font-weight: 700;
+  white-space: nowrap;
+  /* No overflow/ellipsis clipping — long names paint past the name box's own
+     width (bounded by the left column) and visually spill into the center
+     column instead of getting cut off. z-index 2 on .zzz-card__screen-label
+     (vs 1 on .zzz-card__center) keeps the overflow painted on top. */
+  overflow: visible;
+  /* Same 3D text technique as .zzz-card__strip-zzz — 1px black outline (4
+     corners) + a single offset shadow layer in the element's dark tone.
+     A stepped multi-layer "extrusion" was tried here but discrete 1px shadow
+     copies leave visible gaps between layers (there's no pixel data in
+     between), so this stays a flat single-layer shadow instead. */
+  color: #ddd;
+  text-shadow:
+    -1px -1px 0 #000, 1px -1px 0 #000,
+    -1px 1px 0 #000, 1px 1px 0 #000,
+    3px 3px 0 var(--zzz-elem-dark, #000);
+}
+
+.zzz-card__sub {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  font-size: 16px;
+  color: #cfcfcf;
+  width: 100%;
+}
+
+.zzz-card__rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  font-weight: 800;
+  color: #0c0c11;
+  background: var(--zzz-accent);
+  border-radius: 3px;
+  text-shadow: none; /* inherited from .zzz-card__screen-label otherwise — not wanted on the solid-color badge */
+  padding: 0 10px;
+}
+
+/* Same 3D text technique as .zzz-card__name, shorter offset to match their
+   smaller/secondary role in the sub row. */
+.zzz-card__level,
+.zzz-card__mindscape {
+  color: #ddd;
+  text-shadow:
+    -1px -1px 0 #000, 1px -1px 0 #000,
+    -1px 1px 0 #000, 1px 1px 0 #000,
+    2px 2px 0 var(--zzz-elem-dark, #000);
+}
+
+.zzz-card__skills {
+  display: flex;
+  gap: 6px;
+  align-self: flex-end;  /* bound to the right of the center column */
+}
+
+.zzz-card__skill {
+  position: relative;
+  width: 33px;
+  height: 33px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zzz-card__skill img { width: 100%; height: 100%; object-fit: contain; }
+
+.zzz-card__skill--boosted { border-color: var(--zzz-accent); }
+
+.zzz-card__skill-lv {
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  font-size: 9px;
+  font-weight: 700;
+  background: rgba(0,0,0,0.85);
+  border-radius: 3px;
+  padding: 0 3px;
+  line-height: 13px;
+}
+
+/* Character picker — vertical scrollable list on the right. */
+.zzz-debug-picker {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  background: rgba(0,0,0,0.88);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  max-height: calc(100% - 12px);
+  overflow-y: auto;
+  width: 180px;
+}
+
+.zzz-debug-picker__btn {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 10px;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 4px;
+  background: rgba(255,255,255,0.08);
+  color: #ddd;
+  cursor: pointer;
+  text-align: center;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.zzz-debug-picker__reframe {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border: 1px solid rgba(255,200,0,0.5);
+  border-radius: 4px;
+  background: rgba(255,200,0,0.12);
+  color: #ffc800;
+  cursor: pointer;
+  text-align: center;
+  width: 100%;
+}
+
+.zzz-debug-picker__btn--active {
+  background: var(--zzz-accent);
+  color: #000;
+  border-color: var(--zzz-accent);
+}
+
+/* ── CENTER column ───────────────────────────────────────────────────────── */
+
+.zzz-card__center {
+  width: 42%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 28px 10px 12px;
+  gap: 10px;
+}
+
+.zzz-card__weng {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.zzz-card__weng-icon {
+  width: 76px;
+  height: 76px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.zzz-card__weng-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.zzz-card__weng-name { font-size: 16px; font-weight: 700; }
+
+.zzz-card__weng-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: #ddd;
+}
+
+.zzz-card__weng-rank { font-weight: 800; color: var(--zzz-accent); }
+.zzz-card__sep { color: #777; }
+
+.zzz-card__weng-sub { font-size: 14px; color: #ddd; }
+
+.zzz-card__stats {
+  display: flex;
+  gap: 0 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.zzz-card__stats-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.zzz-card__stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 4px 10px;
+}
+
+.zzz-card__stat-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #ddd;
+}
+.zzz-card__stat-icon {
+  width: 15px;
+  height: 15px;
+  color: #ddd;
+}
+.zzz-card__stat-value {
+  font-weight: 700;
+  color: #ddd;
+}
+
+.zzz-card__sets {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.zzz-card__set-tag {
+  font-size: 10px;
+  color: var(--zzz-accent);
+  white-space: normal;
+  text-shadow: 0 1px 2px #000, 0 0 3px rgba(0,0,0,0.9);
+}
+
+/* ── Black right-edge strip (the rightmost object) ───────────────────────── */
+
+@keyframes zzz-stripe-flow {
+  from { background-position: 0 0; }
+  to   { background-position: 0 28px; }
+}
+
+.zzz-card__strip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 60px;
+  background: repeating-linear-gradient(
+    45deg,
+    #000 0px,       #000 10px,
+    var(--zzz-accent) 10px, var(--zzz-accent) 20px
+  );
+  background-size: 28px 28px;
+  animation: zzz-stripe-flow 1s linear infinite;
+  z-index: 2;   /* on top of the disc (z-index 0), so only the disc's left half shows */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Left-edge accent: 3px black + 5px yellow */
+.zzz-card__strip::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  width: 8px;
+  background: linear-gradient(to right, #000 0px, #000 3px, var(--zzz-accent) 3px, var(--zzz-accent) 8px);
+}
+
+/* Right-edge accent: 5px yellow + 3px black (inverse of left) */
+.zzz-card__strip::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; right: 0;
+  width: 8px;
+  background: linear-gradient(to right, var(--zzz-accent) 0px, var(--zzz-accent) 5px, #000 5px, #000 8px);
+}
+
+.zzz-card__strip-text {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  color: #000;
+  font-size: 31px;
+  letter-spacing: 0.15em;
+  font-weight: 700;
+  text-shadow:
+    -1px -1px 0 #ddd, 1px -1px 0 #ddd, -1px 1px 0 #ddd, 1px 1px 0 #ddd,
+    1px 1px 0 #ddd,
+    2px 2px 0 #ddd;
+}
+
+.zzz-card__strip-zzz {
+  text-shadow:
+    -1px -1px 0 #ddd, 1px -1px 0 #ddd, -1px 1px 0 #ddd, 1px 1px 0 #ddd,
+    2px 2px 0 #ddd,
+    3px 3px 0 #ddd,
+    4px 4px 0 #ddd;
+}
+
+/* ── Spinning drive-disc "CD" at the right edge ──────────────────────────── */
+
+/* Circle of diameter (card height - 40px), vertically centered, with its CENTRE
+   on the strip's inner edge (right:20px + translateX(50%)). Right half is clipped
+   by the card's overflow:hidden, so a big half-CD protrudes from the right edge. */
+.zzz-disc {
+  position: absolute;
+  top: 20px;
+  bottom: 20px;
+  right: 60px;
+  aspect-ratio: 1 / 1;
+  transform: translateX(50%);
+  z-index: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Plain, non-moving black circle behind the disc, same size/position, carrying
+   the divider shadow so the shadow itself doesn't spin/move with the disc. */
+.zzz-disc__backdrop {
+  position: absolute;
+  top: 20px;
+  bottom: 20px;
+  right: 60px;
+  aspect-ratio: 1 / 1;
+  transform: translateX(50%);
+  z-index: 0;
+  border-radius: 50%;
+  background: #000;
+  opacity: 0.6;
+  pointer-events: none;
+  box-shadow: -25px 0 5px rgba(0, 0, 0, 1);
+}
+
+/* Outer layer = the fast CCW burst (JS sets the rotation; easing approximates
+   elastic with a back-overshoot). */
+.zzz-disc__burst {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s cubic-bezier(0.55, -0.25, 0.3, 1.25);
+}
+
+/* Inner layer = continuous slow CCW idle spin. */
+.zzz-disc__slow {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  animation: zzz-disc-slow 40s linear infinite;
+}
+
+@keyframes zzz-disc-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+
+/* Two stacked set-icon discs crossfade during the burst. Sharpen filter
+   compensates for the small native size of the source game UI icons. */
+.zzz-disc__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: url(#zzz-disc-sharpen);
+}
+
+/* Angular echo motion blur: trailing copies of the disc, each rotated a few
+   degrees further back and faded out, simulating a rotational blur without
+   an actual blur() filter (transform-only, GPU-composited, cheap). */
+.zzz-disc__echo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* ── RIGHT column: 6 drive discs ─────────────────────────────────────────── */
+
+.zzz-card__right {
+  width: 28%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 10px 10px 18px;
+  gap: 5px;
+  margin-right: 60px;   /* clear the black strip — discs are no longer the rightmost object */
+  background: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 20%);
+  border-radius: 4px;
+}
+
+.zzz-card__right .artifact-slot {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+}
+
+.zzz-card__right .artifact-slot__thumb-col {
+  width: 34px;
+  flex-shrink: 0;
+  position: relative;
+  /* Same technique as HSR (.hsr-card__relics .artifact-slot__thumb-col margin-left):
+     shifts the whole box — icon and its overlay content together — right, leaving
+     the gap between it and the slot's own background to its left. padding-left
+     would shrink the icon instead, since its width is 100% of the content box. */
+  margin-left: 10px;
+}
+
+.zzz-card__right .artifact-slot__icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center 50%;
+  transform: scale(1.2);
+}
+
+.zzz-card__right .artifact-slot__overlay {
+  position: absolute;
+  bottom: 0;
+  /* left is 6px (not 0 + margin-left) — position:absolute with left/right both set
+     plus a non-auto margin is an over-constrained box, resolved inconsistently
+     across engines. Setting left directly is unambiguous and actually shifts
+     the whole box (main-row and meta both) the same amount as the icon. */
+  left: 6px;
+  /* No `right` and no fixed width — thumb-col is only 34px wide, and 5 stars
+     plus the level number at their current font size need far more than that.
+     Sizing to content (shrink-to-fit, the default for an absolutely positioned
+     box with only `left` set) lets it grow into the gap already reserved
+     before the substats instead of being clipped. */
+  width: max-content;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1px;
+}
+
+.zzz-card__right .artifact-slot__main-row {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  margin-left: -4px;
+}
+
+.zzz-card__right .artifact-slot__main-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 2px #000, 0 0 3px #000, 0 0 6px rgba(0,0,0,0.95), 0 0 6px rgba(0,0,0,0.95);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.zzz-card__right .artifact-slot__meta {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  margin-left: -12px;  /* nudge left of main-value, independent of the shared flex-start edge */
+}
+
+.zzz-card__right .artifact-slot__star {
+  font-size: 9px;
+  color: #e8b84b;
+  text-shadow: 0 1px 2px #000;
+  line-height: 1;
+}
+
+.zzz-card__right .artifact-slot__level {
+  font-size: 10px;
+  color: #ccc;
+  text-shadow: 0 1px 2px #000;
+  line-height: 1.2;
+}
+
+/* Main-stat icon over the disc image — ZzzStatIcon renders an inline <svg>,
+   not an <img>, so it needs its own selector or this filter never applies. */
+.zzz-card__right .artifact-slot__overlay img,
+.zzz-card__right .artifact-slot__overlay svg {
+  filter: drop-shadow(0 1px 2px #000) drop-shadow(0 0 2px #000) drop-shadow(0 0 3px rgba(0,0,0,0.95));
+}
+
+/* Elemental DMG Bonus icon (ZzzArtifactStatIcon -> ZzzElementIcon) — sized to
+   fill the fixed-size wrapper span ZzzArtifactStatIcon renders it into. */
+.zzz-artifact-elem-icon {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.zzz-card__right .artifact-slot__substats {
+  flex: 1;
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto auto;
+  justify-content: start;
+  row-gap: 2px;
+  column-gap: 4px;  /* left/right space between the two stat pairs on a row */
+  align-content: center;
+  align-items: center;
+  padding: 2px 4px 2px 32px;  /* left value = gap between the disc icon and substats */
+}
+
+.zzz-card__right .artifact-slot__sub-pair {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  color: #ddd;
+}
+
+.zzz-card__right .artifact-slot__sub-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.zzz-card__right .artifact-slot__sub-value {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ddd;
+  white-space: nowrap;
+}
+
+.zzz-card__right .artifact-slot--empty {
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 11px;
+}
