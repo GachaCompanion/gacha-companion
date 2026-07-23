@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gacha Companion — Info</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: #1e1f22;
+      color: #dcddde;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 3rem 1.5rem;
+    }
+
+    .page {
+      max-width: 680px;
+      width: 100%;
+    }
+
+    .back-link {
+      display: inline-block;
+      color: #949ba4;
+      text-decoration: none;
+      font-size: 0.85rem;
+      margin-bottom: 2rem;
+    }
+
+    .back-link:hover {
+      color: #dcddde;
+    }
+
+    .card {
+      background-color: #2b2d31;
+      border: 1px solid #3b3d42;
+      border-radius: 12px;
+      padding: 2.5rem;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 1.5rem;
+    }
+
+    h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-top: 2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    h2:first-of-type {
+      margin-top: 0;
+    }
+
+    p {
+      font-size: 0.95rem;
+      color: #dcddde;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    ol, ul {
+      padding-left: 1.4rem;
+      margin-bottom: 1rem;
+    }
+
+    li {
+      font-size: 0.95rem;
+      color: #dcddde;
+      line-height: 1.6;
+      margin-bottom: 0.4rem;
+    }
+
+    code {
+      background-color: #1e1f22;
+      border: 1px solid #3b3d42;
+      border-radius: 4px;
+      padding: 0.1rem 0.4rem;
+      font-family: "Cascadia Code", Consolas, monospace;
+      font-size: 0.85rem;
+    }
+
+    pre {
+      background-color: #1e1f22;
+      border: 1px solid #3b3d42;
+      border-radius: 8px;
+      padding: 1rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+
+    pre code {
+      background: none;
+      border: none;
+      padding: 0;
+    }
+
+    a {
+      color: #5865f2;
+    }
+
+    a:hover {
+      color: #7983f5;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #3b3d42;
+      margin: 1.5rem 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <a class="back-link" href="index.html">&larr; Back to download page</a>
+    <div class="card">
+      <h1>Gacha Companion</h1>
+      <p>A personal desktop companion for your gacha games. Track characters, resources, pull history, and more — all in one place.</p>
+      <p>This project is built with the help of Claude Code — anything you see here has been made via prompts, so if you're against AI-assisted projects, this may not be for you. Bugs are bound to exist.</p>
+
+      <hr />
+
+      <h2>Installing</h2>
+      <ol>
+        <li>Download the installer from the <a href="index.html">download page</a> (or directly from the <a href="https://github.com/GachaCompanion/gacha-companion/releases/latest">latest Release</a>).</li>
+        <li>Run <code>GachaCompanion-Setup.exe</code> — if Windows shows a warning, click <strong>More info</strong> then <strong>Run anyway</strong>.</li>
+        <li>Follow the installer steps and click <strong>Install</strong>.</li>
+        <li>Launch from the Desktop or Start Menu shortcut.</li>
+      </ol>
+
+      <h2>Uninstalling</h2>
+      <ol>
+        <li>Open <strong>Windows Settings &rarr; Apps</strong> (or Control Panel &rarr; Add or Remove Programs).</li>
+        <li>Search for <strong>Gacha Companion</strong> and uninstall it.</li>
+        <li>Your personal data is stored separately and is <strong>not</strong> removed by the uninstaller. If you want a clean wipe, after uninstalling also delete this folder:
+          <pre><code>%APPDATA%\gacha-companion</code></pre>
+          (Win + R, paste that, Enter, then delete the folder.)
+        </li>
+      </ol>
+
+      <h2>Your data</h2>
+      <p>While running, your data (games, pity, currency, pull history) is stored in:</p>
+      <pre><code>C:\Users\YourName\AppData\Roaming\gacha-companion</code></pre>
+      <p>This means your data survives updates — installing a newer version never touches it.</p>
+
+      <hr />
+
+      <h2>Copyright</h2>
+      <p>All rights to Genshin Impact, Honkai: Star Rail, Zenless Zone Zero, Wuthering Waves, and Neverness to Everness game assets used in this app are reserved by their respective owners.</p>
+      <p>This app is not affiliated with any of the game publishers. All asset files are the property of their respective owners.</p>
+    </div>
+  </div>
+</body>
+</html>
