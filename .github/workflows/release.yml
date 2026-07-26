@@ -31,8 +31,12 @@ jobs:
       # trying to create a duplicate. softprops/action-gh-release below is idempotent
       # regardless of whether a release for this tag already exists — same action
       # already used successfully for the framing-data releases.
+      # --publish never is required — electron-builder auto-detects it's running
+      # in CI against a tag and defaults to trying to publish anyway even without
+      # `npm run publish`, then fails outright since no GH_TOKEN is set on this step
+      # (publishing is handled entirely by the separate step below instead).
       - name: Build
-        run: npm run react-build && npx electron-builder --win --x64
+        run: npm run react-build && npx electron-builder --win --x64 --publish never
 
       - name: Publish to GitHub release
         uses: softprops/action-gh-release@v2
