@@ -60,6 +60,12 @@ function applyTextSize(size) {
 export default function App() {
   const { data, save, ready } = useStorage();
   const [showSettings, setShowSettings] = useState(false);
+  const [updateReady, setUpdateReady] = useState(false);
+  useEffect(() => {
+    const unsub = window.api?.onUpdateReady(() => setUpdateReady(true));
+    return () => unsub?.();
+  }, []);
+
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [activeProfileName, setActiveProfileName] = useState('Profile 1');
   function refreshActiveProfileName() {
@@ -740,6 +746,15 @@ export default function App() {
       {/* ── Always-visible window controls ── */}
       <div className="title-bar-controls--fixed">
         <div className={`title-bar-controls--fade${controlsVisible ? ' title-bar-controls--fade-visible' : ''}`}>
+          {updateReady && (
+            <button
+              className="title-bar-btn title-bar-update-btn"
+              onClick={() => window.api?.installUpdate()}
+              title="Restart to install the update"
+            >
+              Update ready
+            </button>
+          )}
           <button
             className="title-bar-btn title-bar-profile-btn"
             onClick={() => setShowProfileModal(true)}

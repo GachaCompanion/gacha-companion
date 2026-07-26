@@ -15,6 +15,13 @@ contextBridge.exposeInMainWorld('api', {
   closeWindow: () => ipcRenderer.invoke('window:close'),
   moveWindowBy: (dx, dy) => ipcRenderer.send('window:move-by', dx, dy),
 
+  onUpdateReady: (cb) => {
+    const handler = () => cb();
+    ipcRenderer.on('update:ready', handler);
+    return () => ipcRenderer.removeListener('update:ready', handler);
+  },
+  installUpdate: () => ipcRenderer.invoke('update:install'),
+
   getLoginItem: () => ipcRenderer.invoke('loginItem:get'),
   setLoginItem: (enabled) => ipcRenderer.invoke('loginItem:set', enabled),
 

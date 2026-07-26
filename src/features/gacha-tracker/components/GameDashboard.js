@@ -127,31 +127,31 @@ export default function GameDashboard({ game, onUpdate, onOpenSettings, bannerPa
   const total = getTotal(currency, pullItems, costPerPull);
   const totalPulls = Math.floor(total / costPerPull);
 
+  // History's `total` field is the raw running currency balance (matching what
+  // the Status tab shows) — NOT this combined currency+pullItems*costPerPull
+  // figure. That combined value is only meaningful for this Status tab's own
+  // "Total pulls" affordability stat below, not as a per-day ledger snapshot.
   function addIncome(amount) {
     const newCurrency = Math.max(0, currency + amount);
-    const newTotal = getTotal(newCurrency, pullItems, costPerPull);
-    const history = incrementTodayField(state.history ?? [], 'income', amount, newTotal);
+    const history = incrementTodayField(state.history ?? [], 'income', amount, newCurrency);
     onUpdate({ ...game, state: { ...state, currency: newCurrency, history } });
   }
 
   function addPullItems(count) {
     const newPullItems = Math.max(0, pullItems + count);
-    const newTotal = getTotal(currency, newPullItems, costPerPull);
-    const history = incrementTodayField(state.history ?? [], 'pulls', count, newTotal);
+    const history = incrementTodayField(state.history ?? [], 'pulls', count, currency);
     onUpdate({ ...game, state: { ...state, pullItems: newPullItems, history } });
   }
 
   function setCurrencyDirect(value) {
     const newCurrency = Math.max(0, value);
-    const newTotal = getTotal(newCurrency, pullItems, costPerPull);
-    const history = setTodayTotal(state.history ?? [], newTotal);
+    const history = setTodayTotal(state.history ?? [], newCurrency);
     onUpdate({ ...game, state: { ...state, currency: newCurrency, history } });
   }
 
   function setPullItemsDirect(value) {
     const newPullItems = Math.max(0, value);
-    const newTotal = getTotal(currency, newPullItems, costPerPull);
-    const history = setTodayTotal(state.history ?? [], newTotal);
+    const history = setTodayTotal(state.history ?? [], currency);
     onUpdate({ ...game, state: { ...state, pullItems: newPullItems, history } });
   }
 
@@ -167,8 +167,7 @@ export default function GameDashboard({ game, onUpdate, onOpenSettings, bannerPa
   function claimDailyPass() {
     if (!canClaimDailyPass(state.dailyPassLastClaimedAt)) return; // already claimed since the last reset — button should be disabled, this is defense in depth
     const newCurrency = Math.max(0, currency + dailyClaimAmount);
-    const newTotal = getTotal(newCurrency, pullItems, costPerPull);
-    const history = incrementTodayField(state.history ?? [], 'income', dailyClaimAmount, newTotal);
+    const history = incrementTodayField(state.history ?? [], 'income', dailyClaimAmount, newCurrency);
     onUpdate({ ...game, state: { ...state, currency: newCurrency, history, dailyPassLastClaimedAt: new Date().toISOString() } });
   }
 

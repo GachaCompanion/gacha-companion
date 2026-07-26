@@ -64,6 +64,16 @@
 .title-bar-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
 .title-bar-btn--close:hover { background: var(--danger); color: #fff; }
 
+.title-bar-update-btn {
+  width: auto;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #23a55a;
+  white-space: nowrap;
+}
+.title-bar-update-btn:hover { background: var(--bg-hover); color: #2dc571; }
+
 .title-bar-profile-btn {
   width: auto;
   max-width: 130px;

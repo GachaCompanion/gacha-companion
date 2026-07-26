@@ -29,6 +29,7 @@ const { buildHsrDatExport } = require('./engine/hsr/hsrHistoryExport');
 const { buildZzzRngMoeExport } = require('./engine/zzz/zzzHistoryExport');
 const { buildWuwaTrackerExport } = require('./engine/wuwa/wuwaHistoryExport');
 const releasedIds = require('./engine/releasedIds');
+const { checkForUpdates, installUpdate } = require('./updater');
 const { fetchEnkaUid: _fetchEnkaUid, fetchByGame: _fetchByGame } = require('./engine/showcase/enkaFetch');
 const { fetchAndNormalizeHsr } = require('./engine/showcase/hsrNormalizer');
 const live2d = require('./live2d');
@@ -141,6 +142,11 @@ if (!gotTheLock) {
     // isn't loaded into the window until loadWindowContent() runs, after startup work
     // below finishes, so the servers are already up by the time the renderer needs them.
     createWindow();
+
+    // Only meaningful for a real packaged install (electron-updater errors
+    // out immediately in dev/unpacked runs since there's no update feed to
+    // compare against) — see electron/updater.js.
+    if (app.isPackaged) checkForUpdates(mainWindow);
 
     // Sync pre-computed framing data from GitHub in the background — no blocking.
     syncFraming(app.live2dDir, app.pngDir).catch(() => {});
@@ -550,6 +556,7 @@ nativeTheme.on('updated', () => {
 
 ipcMain.handle('window:minimize', () => mainWindow?.minimize());
 ipcMain.handle('window:close', () => mainWindow?.close());
+ipcMain.handle('update:install', () => installUpdate());
 ipcMain.on('window:move-by', (_, dx, dy) => {
   if (!mainWindow) return;
   const [x, y] = mainWindow.getPosition();

@@ -783,12 +783,25 @@ function IncomeHistoryView({ game, onUpdate, color }) {
   // shows the true all-time running total rather than one that resets to
   // whatever's visible in that slice — same idea as each entry's own stored
   // `total` field already does for cumulative currency.
+  //
+  // Anchored to state.pullItems (today's real, current balance) rather than
+  // starting from 0 at the ledger's first entry — any pull items the player
+  // already had before history tracking began would otherwise be silently
+  // dropped, undercounting every date by that same fixed amount. Only games
+  // with a single pullItems pool (state.pullItems is a number) get this
+  // anchor; NTE/WuWa split pull items into two separate pools (charPullItems/
+  // weaponPullItems) that don't map onto a single running total the same way,
+  // so they fall back to the old un-anchored behavior.
   const cumulativePullsByDate = useMemo(() => {
     if (history.length === 0) return {};
     const byDate = new Map(history.map(e => [e.date, e]));
     const firstDate = [...byDate.keys()].sort()[0];
+    const totalPullsInHistory = history.reduce((sum, e) => sum + (e.pulls ?? 0), 0);
+    const baseline = typeof state.pullItems === 'number'
+      ? state.pullItems - totalPullsInHistory
+      : 0;
     const map = {};
-    let running = 0;
+    let running = baseline;
     const cur = new Date(`${firstDate}T12:00:00`);
     const end = new Date(`${today}T12:00:00`);
     while (cur <= end) {
@@ -798,7 +811,7 @@ function IncomeHistoryView({ game, onUpdate, color }) {
       cur.setDate(cur.getDate() + 1);
     }
     return map;
-  }, [history, today]);
+  }, [history, today, state.pullItems]);
 
   function withCumulativePulls(rows) {
     return rows.map(row => ({ ...row, cumulativePulls: cumulativePullsByDate[row.date] ?? 0 }));
