@@ -143,11 +143,6 @@ if (!gotTheLock) {
     // below finishes, so the servers are already up by the time the renderer needs them.
     createWindow();
 
-    // Only meaningful for a real packaged install (electron-updater errors
-    // out immediately in dev/unpacked runs since there's no update feed to
-    // compare against) — see electron/updater.js.
-    if (app.isPackaged) checkForUpdates(mainWindow);
-
     // Sync pre-computed framing data from GitHub in the background — no blocking.
     syncFraming(app.live2dDir, app.pngDir).catch(() => {});
 
@@ -426,6 +421,20 @@ function createWindow() {
   // DWM already has the correct frame, eliminating the white-flash race entirely.
   ipcMain.once('app:ready', () => {
     if (mainWindow && !mainWindow.isDestroyed()) mainWindow.setOpacity(1);
+
+    // Deliberately started here, not at app.whenReady — confirmed live that
+    // starting it that early races the renderer's own mount (the GitHub
+    // check can resolve in ~1.3s, comfortably beating page load in some
+    // runs), and neither a one-time push nor a one-time pull-on-mount can
+    // reliably win that race in both directions. Waiting for this renderer
+    // handshake (React has mounted and is already subscribed — see App.js)
+    // before even starting the check removes the race entirely: the push
+    // now always happens strictly after the renderer is ready, by
+    // construction, not by hoping either side finishes first. Only
+    // meaningful for a real packaged install (electron-updater errors out
+    // immediately in dev/unpacked runs since there's no update feed to
+    // compare against) — see electron/updater.js.
+    if (app.isPackaged) checkForUpdates(mainWindow);
   });
 }
 
