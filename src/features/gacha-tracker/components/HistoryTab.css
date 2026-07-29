@@ -224,6 +224,7 @@ html.has-bg .history-table-wrap {
 .history-total { font-weight: 600; color: inherit; }
 
 .history-zero { color: var(--text-muted); }
+.history-negative { color: var(--danger); }
 
 /* Brighter table text over backgrounds — inline style on totals still takes priority */
 html.has-bg .history-table td {

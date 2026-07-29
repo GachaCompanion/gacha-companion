@@ -980,14 +980,18 @@ function IncomeHistoryView({ game, onUpdate, color }) {
                         ? <input className="history-edit-input" type="number"
                             value={draft.income}
                             onChange={e => patchDraft(row.date, 'income', e.target.value)} />
-                        : row.income > 0 ? row.income.toLocaleString() : <span className="history-zero">—</span>}
+                        : row.income !== 0
+                          ? <span className={row.income < 0 ? 'history-negative' : undefined}>{row.income.toLocaleString()}</span>
+                          : <span className="history-zero">—</span>}
                     </td>
                     <td className="history-td-center">
                       {editing && draft
                         ? <input className="history-edit-input" type="number"
                             value={draft.pulls}
                             onChange={e => patchDraft(row.date, 'pulls', e.target.value)} />
-                        : row.pulls > 0 ? row.pulls.toLocaleString() : <span className="history-zero">—</span>}
+                        : row.pulls !== 0
+                          ? <span className={row.pulls < 0 ? 'history-negative' : undefined}>{row.pulls.toLocaleString()}</span>
+                          : <span className="history-zero">—</span>}
                     </td>
                     <td className="history-td-right history-total" style={{ color }}>{row.total.toLocaleString()}</td>
                     <td className="history-td-right history-total" style={{ color }}>{row.cumulativePulls.toLocaleString()}</td>
