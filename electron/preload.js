@@ -15,6 +15,12 @@ contextBridge.exposeInMainWorld('api', {
   closeWindow: () => ipcRenderer.invoke('window:close'),
   moveWindowBy: (dx, dy) => ipcRenderer.send('window:move-by', dx, dy),
 
+  onUpdateAvailable: (cb) => {
+    const handler = (_, data) => cb(data);
+    ipcRenderer.on('update:available', handler);
+    return () => ipcRenderer.removeListener('update:available', handler);
+  },
+  downloadUpdate: () => ipcRenderer.invoke('update:download'),
   onUpdateReady: (cb) => {
     const handler = () => cb();
     ipcRenderer.on('update:ready', handler);

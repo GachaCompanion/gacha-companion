@@ -73,6 +73,7 @@
   white-space: nowrap;
 }
 .title-bar-update-btn:hover { background: var(--bg-hover); color: #2dc571; }
+.title-bar-update-btn:disabled { opacity: 0.6; cursor: default; }
 
 .title-bar-profile-btn {
   width: auto;

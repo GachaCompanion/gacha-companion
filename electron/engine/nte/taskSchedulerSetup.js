@@ -327,5 +327,7 @@ module.exports = {
   isTaskRegistered,
   registerTask,
   unregisterTask,
+  launcherVbsPath,
+  writeLauncherVbs,
   triggerTaskAndWaitForResult,
 };

@@ -60,11 +60,28 @@ function applyTextSize(size) {
 export default function App() {
   const { data, save, ready } = useStorage();
   const [showSettings, setShowSettings] = useState(false);
-  const [updateReady, setUpdateReady] = useState(false);
+  // 'available' (asks before downloading anything) -> 'downloading' -> 'ready'
+  // (installer downloaded, launching it is the user's own click, not
+  // automatic — see electron/updater.js for why this is opt-in at every step).
+  const [updateState, setUpdateState] = useState(null);
+  const [updateVersion, setUpdateVersion] = useState(null);
   useEffect(() => {
-    const unsub = window.api?.onUpdateReady(() => setUpdateReady(true));
-    return () => unsub?.();
+    const unsubAvailable = window.api?.onUpdateAvailable(({ version }) => {
+      setUpdateVersion(version);
+      setUpdateState('available');
+    });
+    const unsubReady = window.api?.onUpdateReady(() => setUpdateState('ready'));
+    return () => { unsubAvailable?.(); unsubReady?.(); };
   }, []);
+
+  function handleUpdateClick() {
+    if (updateState === 'available') {
+      setUpdateState('downloading');
+      window.api?.downloadUpdate();
+    } else if (updateState === 'ready') {
+      window.api?.installUpdate();
+    }
+  }
 
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [activeProfileName, setActiveProfileName] = useState('Profile 1');
@@ -746,13 +763,20 @@ export default function App() {
       {/* ── Always-visible window controls ── */}
       <div className="title-bar-controls--fixed">
         <div className={`title-bar-controls--fade${controlsVisible ? ' title-bar-controls--fade-visible' : ''}`}>
-          {updateReady && (
+          {updateState && (
             <button
               className="title-bar-btn title-bar-update-btn"
-              onClick={() => window.api?.installUpdate()}
-              title="Restart to install the update"
+              onClick={handleUpdateClick}
+              disabled={updateState === 'downloading'}
+              title={
+                updateState === 'available' ? `Download update ${updateVersion}`
+                : updateState === 'downloading' ? 'Downloading update...'
+                : 'Click to install the update'
+              }
             >
-              Update ready
+              {updateState === 'available' ? `Update ${updateVersion} available`
+                : updateState === 'downloading' ? 'Downloading...'
+                : 'Update ready'}
             </button>
           )}
           <button

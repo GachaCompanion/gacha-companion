@@ -29,7 +29,7 @@ const { buildHsrDatExport } = require('./engine/hsr/hsrHistoryExport');
 const { buildZzzRngMoeExport } = require('./engine/zzz/zzzHistoryExport');
 const { buildWuwaTrackerExport } = require('./engine/wuwa/wuwaHistoryExport');
 const releasedIds = require('./engine/releasedIds');
-const { checkForUpdates, installUpdate } = require('./updater');
+const { checkForUpdates, downloadUpdate, installUpdate } = require('./updater');
 const { fetchEnkaUid: _fetchEnkaUid, fetchByGame: _fetchByGame } = require('./engine/showcase/enkaFetch');
 const { fetchAndNormalizeHsr } = require('./engine/showcase/hsrNormalizer');
 const live2d = require('./live2d');
@@ -556,6 +556,7 @@ nativeTheme.on('updated', () => {
 
 ipcMain.handle('window:minimize', () => mainWindow?.minimize());
 ipcMain.handle('window:close', () => mainWindow?.close());
+ipcMain.handle('update:download', () => downloadUpdate());
 ipcMain.handle('update:install', () => installUpdate());
 ipcMain.on('window:move-by', (_, dx, dy) => {
   if (!mainWindow) return;
@@ -2052,6 +2053,18 @@ ipcMain.on('nte:capture:start', async (_, { uid, overlayEnabled, calibration }) 
 
   try {
     let useElevatedTask = await nteTaskScheduler.isTaskRegistered().catch(() => false);
+
+    // The scheduled task can stay registered while its target launcher
+    // script (living in the OS temp dir, which isn't guaranteed to survive
+    // a reboot or a temp-cleanup pass) goes missing — schtasks then fails
+    // with "Can not find script file" even though the task itself still
+    // shows as registered. Regenerating the script is a plain, non-elevated
+    // file write (see writeLauncherVbs), so this self-heals without a new
+    // UAC prompt — only a genuinely unregistered task needs the full
+    // (elevated) re-register below.
+    if (useElevatedTask && !fs.existsSync(nteTaskScheduler.launcherVbsPath())) {
+      try { nteTaskScheduler.writeLauncherVbs(); } catch (_) {}
+    }
 
     // Auto-register on first use rather than requiring the separate Settings
     // toggle to be clicked ahead of time — guarantees every user actually
