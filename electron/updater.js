@@ -29,12 +29,20 @@ let pendingInstallerPath = null;
 
 // The update check starts immediately at app.whenReady, well before the
 // renderer's React app has mounted and subscribed to onUpdateAvailable/
-// onUpdateReady — confirmed live: the check can resolve in ~2.5s, easily
-// beating the renderer's own load time, and webContents.send() to a
-// not-yet-listening renderer is simply lost (Electron doesn't queue/replay
-// it). This tracks whatever the latest known state is so it can be
-// re-delivered once the renderer actually signals it's ready (see
-// resendPendingState, called from main.js's existing 'app:ready' handshake).
+// onUpdateReady — confirmed live: the check can resolve in as little as ~1s,
+// and there's no reliable guarantee it happens strictly before OR after the
+// renderer is ready (confirmed both orderings happen across different
+// launches). webContents.send() to a not-yet-listening renderer is simply
+// lost (Electron doesn't queue/replay it), so relying on push delivery
+// alone — even resent once at an "app is ready" handshake — is inherently
+// racy in either direction.
+//
+// This tracks whatever the latest known state is (still pushed immediately
+// when it changes, for the common case where the renderer's already up) AND
+// exposes getPendingState() for the renderer to actively PULL once it mounts
+// (see App.js) — a pull can never be "too early" or "too late" the way a
+// push can, since it's the renderer itself asking "what's true right now?"
+// after it's already guaranteed to be ready to act on the answer.
 let pendingState = null; // { type: 'available', version } | { type: 'ready' } | null
 
 function sendState(mainWindow, state) {
@@ -43,8 +51,8 @@ function sendState(mainWindow, state) {
   else if (state.type === 'ready') mainWindow?.webContents.send('update:ready');
 }
 
-function resendPendingState(mainWindow) {
-  sendState(mainWindow, pendingState);
+function getPendingState() {
+  return pendingState;
 }
 
 function checkForUpdates(mainWindow) {
@@ -104,4 +112,4 @@ async function installUpdate() {
   app.quit();
 }
 
-module.exports = { checkForUpdates, downloadUpdate, installUpdate, logPath, resendPendingState };
+module.exports = { checkForUpdates, downloadUpdate, installUpdate, logPath, getPendingState };

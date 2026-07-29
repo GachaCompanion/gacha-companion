@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld('api', {
   closeWindow: () => ipcRenderer.invoke('window:close'),
   moveWindowBy: (dx, dy) => ipcRenderer.send('window:move-by', dx, dy),
 
+  getUpdateState: () => ipcRenderer.invoke('update:getState'),
   onUpdateAvailable: (cb) => {
     const handler = (_, data) => cb(data);
     ipcRenderer.on('update:available', handler);

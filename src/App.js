@@ -66,6 +66,19 @@ export default function App() {
   const [updateState, setUpdateState] = useState(null);
   const [updateVersion, setUpdateVersion] = useState(null);
   useEffect(() => {
+    function applyState(state) {
+      if (!state) return;
+      if (state.type === 'available') { setUpdateVersion(state.version); setUpdateState('available'); }
+      else if (state.type === 'ready') setUpdateState('ready');
+    }
+    // Pulled once on mount, in addition to the push subscriptions below —
+    // the update check in main.js can finish before OR after this component
+    // mounts (confirmed live, no reliable ordering either way), and a push
+    // sent to a not-yet-listening renderer is simply lost. Pulling the
+    // current state directly can never be "too early" or "too late" the way
+    // a push can, since it's asked for only once this code is already
+    // running and able to act on the answer.
+    window.api?.getUpdateState().then(applyState);
     const unsubAvailable = window.api?.onUpdateAvailable(({ version }) => {
       setUpdateVersion(version);
       setUpdateState('available');
