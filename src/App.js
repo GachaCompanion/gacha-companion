@@ -66,10 +66,12 @@ export default function App() {
   const [updateState, setUpdateState] = useState(null);
   const [updateVersion, setUpdateVersion] = useState(null);
   useEffect(() => {
+    console.log('[update-debug] effect mounted, window.api exists:', !!window.api);
     function applyState(state) {
+      console.log('[update-debug] pull resolved with:', state);
       if (!state) return;
-      if (state.type === 'available') { setUpdateVersion(state.version); setUpdateState('available'); }
-      else if (state.type === 'ready') setUpdateState('ready');
+      if (state.type === 'available') { console.log('[update-debug] setting available', state.version); setUpdateVersion(state.version); setUpdateState('available'); }
+      else if (state.type === 'ready') { console.log('[update-debug] setting ready'); setUpdateState('ready'); }
     }
     // Pulled once on mount, in addition to the push subscriptions below —
     // the update check in main.js can finish before OR after this component
@@ -80,12 +82,17 @@ export default function App() {
     // running and able to act on the answer.
     window.api?.getUpdateState().then(applyState);
     const unsubAvailable = window.api?.onUpdateAvailable(({ version }) => {
+      console.log('[update-debug] push onUpdateAvailable fired:', version);
       setUpdateVersion(version);
       setUpdateState('available');
     });
-    const unsubReady = window.api?.onUpdateReady(() => setUpdateState('ready'));
+    const unsubReady = window.api?.onUpdateReady(() => {
+      console.log('[update-debug] push onUpdateReady fired');
+      setUpdateState('ready');
+    });
     return () => { unsubAvailable?.(); unsubReady?.(); };
   }, []);
+  useEffect(() => { console.log('[update-debug] updateState changed to:', updateState); }, [updateState]);
 
   function handleUpdateClick() {
     if (updateState === 'available') {
