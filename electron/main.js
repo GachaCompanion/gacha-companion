@@ -29,7 +29,7 @@ const { buildHsrDatExport } = require('./engine/hsr/hsrHistoryExport');
 const { buildZzzRngMoeExport } = require('./engine/zzz/zzzHistoryExport');
 const { buildWuwaTrackerExport } = require('./engine/wuwa/wuwaHistoryExport');
 const releasedIds = require('./engine/releasedIds');
-const { checkForUpdates, downloadUpdate, installUpdate } = require('./updater');
+const { checkForUpdates, downloadUpdate, installUpdate, resendPendingState } = require('./updater');
 const { fetchEnkaUid: _fetchEnkaUid, fetchByGame: _fetchByGame } = require('./engine/showcase/enkaFetch');
 const { fetchAndNormalizeHsr } = require('./engine/showcase/hsrNormalizer');
 const live2d = require('./live2d');
@@ -426,6 +426,9 @@ function createWindow() {
   // DWM already has the correct frame, eliminating the white-flash race entirely.
   ipcMain.once('app:ready', () => {
     if (mainWindow && !mainWindow.isDestroyed()) mainWindow.setOpacity(1);
+    // Re-delivers whatever update state was already found before the
+    // renderer was ready to receive it — see updater.js's pendingState.
+    resendPendingState(mainWindow);
   });
 }
 

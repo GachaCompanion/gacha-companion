@@ -27,6 +27,26 @@ function log(message) {
 
 let pendingInstallerPath = null;
 
+// The update check starts immediately at app.whenReady, well before the
+// renderer's React app has mounted and subscribed to onUpdateAvailable/
+// onUpdateReady — confirmed live: the check can resolve in ~2.5s, easily
+// beating the renderer's own load time, and webContents.send() to a
+// not-yet-listening renderer is simply lost (Electron doesn't queue/replay
+// it). This tracks whatever the latest known state is so it can be
+// re-delivered once the renderer actually signals it's ready (see
+// resendPendingState, called from main.js's existing 'app:ready' handshake).
+let pendingState = null; // { type: 'available', version } | { type: 'ready' } | null
+
+function sendState(mainWindow, state) {
+  if (!state) return;
+  if (state.type === 'available') mainWindow?.webContents.send('update:available', { version: state.version });
+  else if (state.type === 'ready') mainWindow?.webContents.send('update:ready');
+}
+
+function resendPendingState(mainWindow) {
+  sendState(mainWindow, pendingState);
+}
+
 function checkForUpdates(mainWindow) {
   autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = false;
@@ -36,7 +56,8 @@ function checkForUpdates(mainWindow) {
   autoUpdater.on('checking-for-update', () => log('checking-for-update'));
   autoUpdater.on('update-available', (info) => {
     log(`update-available: ${info.version}`);
-    mainWindow?.webContents.send('update:available', { version: info.version });
+    pendingState = { type: 'available', version: info.version };
+    sendState(mainWindow, pendingState);
   });
   autoUpdater.on('update-not-available', (info) => log(`update-not-available (current: ${info.version})`));
   autoUpdater.on('download-progress', (p) => log(`download-progress: ${Math.round(p.percent)}%`));
@@ -46,7 +67,8 @@ function checkForUpdates(mainWindow) {
     log(`update-downloaded: ${info.version} -> ${info.downloadedFile}`);
     pendingInstallerPath = info.downloadedFile;
     markAsDownloaded(pendingInstallerPath);
-    mainWindow?.webContents.send('update:ready');
+    pendingState = { type: 'ready' };
+    sendState(mainWindow, pendingState);
   });
 
   autoUpdater.checkForUpdates().catch((e) => log(`checkForUpdates() rejected: ${e?.message}`));
@@ -82,4 +104,4 @@ async function installUpdate() {
   app.quit();
 }
 
-module.exports = { checkForUpdates, downloadUpdate, installUpdate, logPath };
+module.exports = { checkForUpdates, downloadUpdate, installUpdate, logPath, resendPendingState };
