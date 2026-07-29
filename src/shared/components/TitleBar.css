@@ -70,9 +70,12 @@
   font-size: 12px;
   font-weight: 600;
   color: #23a55a;
+  background: transparent;
+  border: 1px solid #23a55a;
+  border-radius: var(--radius-sm);
   white-space: nowrap;
 }
-.title-bar-update-btn:hover { background: var(--bg-hover); color: #2dc571; }
+.title-bar-update-btn:hover { background: rgba(35, 165, 90, 0.15); }
 .title-bar-update-btn:disabled { opacity: 0.6; cursor: default; }
 
 .title-bar-profile-btn {
