@@ -33,21 +33,6 @@ This means your data survives updates — installing a newer version never touch
 
 ---
 
-## Dev setup (only if you're editing code)
-
-```bash
-npm install
-npm run dev
-```
-
-Building a local installer:
-```bash
-npm run build-exe
-```
-The installer appears in `dist/` as `GachaCompanion-Setup.exe`.
-
----
-
 ## Copyright
 
 All rights to Genshin Impact, Honkai: Star Rail, Zenless Zone Zero, Wuthering Waves, and Neverness to Everness game assets used in this app are reserved by their respective owners.
