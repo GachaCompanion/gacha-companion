@@ -45,6 +45,7 @@ contextBridge.exposeInMainWorld('api', {
 
   fetchGenshinBanners: () => ipcRenderer.invoke('genshin:fetchBanners'),
   getGenshinBannerImageById: (id) => ipcRenderer.invoke('genshin:getBannerImageById', { id }),
+  getNanokaRoster: (linkedDatabase) => ipcRenderer.invoke('nanoka:getRoster', { linkedDatabase }),
 
   readGenshinLog: () => ipcRenderer.invoke('gacha:readGenshinLog'),
   fetchWishHistory: (url, gachaType, cutoffTime, extraParams) => ipcRenderer.invoke('gacha:fetchWishHistory', { url, gachaType, cutoffTime, extraParams }),

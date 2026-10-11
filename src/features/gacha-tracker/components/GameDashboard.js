@@ -11,6 +11,7 @@ import NtePullLogTab from '../games/nte/NtePullLogTab';
 import NteStatusTab from '../games/nte/NteStatusTab';
 import WuwaStatusTab from '../games/wuwa/WuwaStatusTab';
 import WishListTab from './WishListTab';
+import CostCalculatorTab from './CostCalculatorTab';
 import NteWishListTab from '../games/nte/NteWishListTab';
 import { ResourceCard, PullItemsStepper, IncomeRow, DailyPassRow } from './StatusFields';
 import { useAccent } from '../../../shared/contexts/AccentContext';
@@ -176,6 +177,9 @@ export default function GameDashboard({ game, onUpdate, onOpenSettings, bannerPa
     ['history', t('History')],
     ...(game.linkedDatabase ? [['pulllog', t('Pull Log')]] : []),
     ['wishlist', t('Wish List')],
+    // Element-grouped list of maxed characters, derived from the pull log —
+    // see CostCalculatorTab.js + engine/rosterGameConfig.js (per-game data).
+    ...(game.linkedDatabase ? [['costcalc', t('Roster')]] : []),
     ['calculator', t('Calculator')],
   ];
 
@@ -269,6 +273,9 @@ export default function GameDashboard({ game, onUpdate, onOpenSettings, bannerPa
           ) : (
             <WishListTab game={game} onUpdate={onUpdate} color={color} />
           )
+        )}
+        {tab === 'costcalc' && (
+          <CostCalculatorTab game={game} onUpdate={onUpdate} color={color} />
         )}
         {tab === 'calculator' && (
           game.linkedDatabase === 'genshin'

@@ -29,6 +29,7 @@ const { buildHsrDatExport } = require('./engine/hsr/hsrHistoryExport');
 const { buildZzzRngMoeExport } = require('./engine/zzz/zzzHistoryExport');
 const { buildWuwaTrackerExport } = require('./engine/wuwa/wuwaHistoryExport');
 const releasedIds = require('./engine/releasedIds');
+const nanokaRoster = require('./engine/nanokaRoster');
 const { checkForUpdates, downloadUpdate, installUpdate, getPendingState } = require('./updater');
 const { fetchEnkaUid: _fetchEnkaUid, fetchByGame: _fetchByGame } = require('./engine/showcase/enkaFetch');
 const { fetchAndNormalizeHsr } = require('./engine/showcase/hsrNormalizer');
@@ -2830,6 +2831,27 @@ ipcMain.handle('genshin:getBannerImageById', async (_, { id }) => {
     return `data:${detectImageMime(data)};base64,${data.toString('base64')}`;
   } catch {
     return null;
+  }
+});
+
+// ─── Teams tab: name→id→element resolution via nanoka.cc ──────────────────────
+// Only resolves which id to ask the get<Game>BannerImage handlers above for —
+// see electron/engine/nanokaRoster.js. The actual image bytes still always
+// come from gc-data via those existing handlers, never from nanoka directly.
+ipcMain.handle('nanoka:getRoster', async (_, { linkedDatabase }) => {
+  const cacheDirByGame = {
+    genshin: app.genshinCacheDir,
+    hsr:     app.hsrCacheDir,
+    zzz:     app.zzzCacheDir,
+    wuwa:    app.wuwaCacheDir,
+    nte:     app.nteCacheDir,
+  };
+  const cacheDir = cacheDirByGame[linkedDatabase];
+  if (!cacheDir) return { characters: {}, weapons: {} };
+  try {
+    return await nanokaRoster.getRoster(linkedDatabase, cacheDir);
+  } catch {
+    return { characters: {}, weapons: {} };
   }
 });
 

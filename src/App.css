@@ -145,7 +145,8 @@
 .gc-results-panel, .hc-results-panel, .zc-results-panel,
 .wishlist-entry, .wishlist-labels-bar,
 .wishlist-labels-hint, .wishlist-label-btn, .wishlist-labels-sep,
-.wishlist-add-btn, .wishlist-header-row > div {
+.wishlist-add-btn, .wishlist-header-row > div,
+.teams-tab {
   transition: opacity 0.25s ease;
 }
 
@@ -166,7 +167,8 @@
 .app-ui--hidden .wishlist-entry, .app-ui--hidden .wishlist-labels-bar,
 .app-ui--hidden .wishlist-labels-hint, .app-ui--hidden .wishlist-label-btn,
 .app-ui--hidden .wishlist-labels-sep, .app-ui--hidden .wishlist-add-btn,
-.app-ui--hidden .wishlist-header-row > div {
+.app-ui--hidden .wishlist-header-row > div,
+.app-ui--hidden .teams-tab {
   opacity: 0;
 }
 

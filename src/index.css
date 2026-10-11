@@ -89,6 +89,15 @@ html.has-bg[data-theme="light"] {
   padding: 0;
 }
 
+/* Chromium lets any <img> be click-dragged into a ghost-drag/drop-target
+   gesture by default — never wanted in this app (Pull Log, showcase cards,
+   Teams tab, etc. all hit this). One global opt-out instead of a per-image
+   draggable={false} + CSS pair scattered across every component. */
+img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
 html, body, #root {
   height: 100%;
   width: 100%;

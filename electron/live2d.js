@@ -25,12 +25,29 @@ const RECIPES = {
     // Spine name resolved per-character from:
     //   https://static.nanoka.cc/zzz/{version}/en/character/{id}.json → .live2_d
     // Files at: {base}/{live2_d}.skel / .atlas / texture (flat, no per-ID subdir).
-    characterUrl: (id) => `https://static.nanoka.cc/zzz/3.1.3+17077339/en/character/${id}.json`,
+    // {version} is nanoka's current ZZZ asset build (rotates every patch) — resolved
+    // at runtime via getZzzVersion(), never hardcoded (see reference_nanoka_spine).
+    characterUrl: (id, version) => `https://static.nanoka.cc/zzz/${version}/en/character/${id}.json`,
+    rosterUrl: (version) => `https://static.nanoka.cc/zzz/${version}/character.json`,
     base: 'https://static.nanoka.cc/assets/zzz/live2d',
     flat: true,
     headers: { Referer: 'https://zzz.nanoka.cc/', Origin: 'https://zzz.nanoka.cc' },
   },
 };
+
+// nanoka's current ZZZ asset build, e.g. "3.3.4+19293654" — fetched from their
+// top-level manifest and cached for the process lifetime (restart the app to refresh).
+let _zzzVersion = null;
+async function getZzzVersion(recipe) {
+  if (_zzzVersion) return _zzzVersion;
+  const res = await fetch('https://static.nanoka.cc/manifest.json', { headers: headers(recipe) });
+  if (!res.ok) throw new Error(`nanoka manifest HTTP ${res.status}`);
+  const data = await res.json();
+  const version = data?.zzz?.latest;
+  if (!version) throw new Error('nanoka manifest missing zzz.latest');
+  _zzzVersion = version;
+  return version;
+}
 
 // Cache: HSR manifest (id -> base name string), ZZZ per-character spine names.
 const _manifests = {};        // hsr: { id -> baseName }
@@ -54,7 +71,8 @@ async function getManifest(game) {
 // Returns null if the character has no Live2D (live2_d field absent or empty).
 async function resolveZzzSpineName(id, recipe) {
   if (_zzzSpineNames[id] !== undefined) return _zzzSpineNames[id];
-  const url = recipe.characterUrl(id);
+  const version = await getZzzVersion(recipe);
+  const url = recipe.characterUrl(id, version);
   const res = await fetch(url, { headers: headers(recipe) });
   if (!res.ok) { _zzzSpineNames[id] = null; return null; }
   const data = await res.json();
@@ -201,7 +219,8 @@ async function listManifestIds(game) {
   if (!recipe) return [];
   if (recipe.characterUrl) {
     if (_zzzCharacterIds.length) return [..._zzzCharacterIds];
-    const res = await fetch(`https://static.nanoka.cc/zzz/3.1.3+17077339/character.json`, { headers: headers(recipe) });
+    const version = await getZzzVersion(recipe);
+    const res = await fetch(recipe.rosterUrl(version), { headers: headers(recipe) });
     if (!res.ok) return [];
     const data = await res.json();
     const ids = Object.entries(data)
