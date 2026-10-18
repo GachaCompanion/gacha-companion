@@ -199,9 +199,11 @@ export function incrementTodayField(history, field, delta, total) {
 // Whether the Daily Pass claim button should currently be clickable.
 // `lastClaimedAt` is an ISO timestamp string, or null/undefined if never
 // claimed.
-export function canClaimDailyPass(lastClaimedAt, now = new Date()) {
+// `reset` ({hour, timeZone}) overrides the shared reset for a game whose day
+// rolls over elsewhere (Umamusume) — undefined keeps the default.
+export function canClaimDailyPass(lastClaimedAt, now = new Date(), reset) {
   if (!lastClaimedAt) return true;
   const last = new Date(lastClaimedAt);
   if (isNaN(last.getTime())) return true;
-  return last < getMostRecentDailyReset(now);
+  return last < getMostRecentDailyReset(now, reset);
 }

@@ -70,7 +70,7 @@ export function DailyPassRow({ label, amount, active, claimable = true, onToggle
   );
 }
 
-export function IncomeRow({ label, color, onAdd, isInt }) {
+export function IncomeRow({ label, color, onAdd, isInt, buttonLabel = 'Add' }) {
   const [draft, setDraft] = useState('');
   const parsed = isInt ? parseInt(draft, 10) : Number(draft);
   const canAdd = draft !== '' && draft !== '-' && !isNaN(parsed) && parsed !== 0;
@@ -96,7 +96,7 @@ export function IncomeRow({ label, color, onAdd, isInt }) {
         onClick={commit}
         disabled={!canAdd}
       >
-        Add
+        {buttonLabel}
       </button>
     </div>
   );

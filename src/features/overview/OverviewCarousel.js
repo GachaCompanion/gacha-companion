@@ -18,6 +18,11 @@ import nteTriKey from '../../assets/currencies/nte/tri-key.png';
 import wuwaAstrite from '../../assets/currencies/wuwa/astrite.png';
 import wuwaRadiantTide from '../../assets/currencies/wuwa/radiant-tide.png';
 import wuwaForgingTide from '../../assets/currencies/wuwa/forging-tide.png';
+// Free and Paid Carats are the same picture; Overview shows their combined
+// total in one currency slot.
+import umaCarat from '../../assets/currencies/umamusume/free-carats.png';
+import umaTraineeTicket from '../../assets/currencies/umamusume/trainee-scout-ticket.png';
+import umaSupportTicket from '../../assets/currencies/umamusume/support-card-scout-ticket.png';
 
 // Per-database currency/pull-item icons — keyed the same way as
 // DB_CURRENCY_OVERRIDES in gameSchema.js, since these images map 1:1 to
@@ -29,6 +34,7 @@ const CURRENCY_ICONS = {
   zzz:     { currency: zzzPolychrome,   pullItem: zzzEncryptedMasterTape },
   nte:     { currency: nteAnnulith,     pullItem: nteSolidDice,   weaponPullItem: nteTriKey },
   wuwa:    { currency: wuwaAstrite,     pullItem: wuwaRadiantTide, weaponPullItem: wuwaForgingTide },
+  umamusume: { currency: umaCarat,      pullItem: umaTraineeTicket, weaponPullItem: umaSupportTicket },
 };
 
 const CARDS_PER_ROW = 5;

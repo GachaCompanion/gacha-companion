@@ -1,0 +1,18 @@
+/* Fills exactly the space the dashboard content area has left (it's a flex
+   column with a definite height) — min-height: 0 is what lets it SHRINK to
+   fit instead of forcing the app's own scrollbar to appear. The embedded
+   page scrolls internally. */
+.uma-embed {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.uma-embed-frame {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+}

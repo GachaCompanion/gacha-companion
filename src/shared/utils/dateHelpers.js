@@ -8,6 +8,12 @@
 const DAILY_RESET_HOUR = 5;
 const DAILY_RESET_TIMEZONE = 'Europe/Vienna';
 
+// Every helper below takes an optional `{ hour, timeZone }` reset and defaults
+// to the one above — a game whose day rolls over elsewhere (Umamusume:
+// 00:00 Asia/Tokyo, see games/umamusume/umamusumeLedger.js) passes its own,
+// so the other games are unaffected.
+const DEFAULT_RESET = { hour: DAILY_RESET_HOUR, timeZone: DAILY_RESET_TIMEZONE };
+
 function getTzOffsetMinutes(date, timeZone) {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone, hourCycle: 'h23',
@@ -32,16 +38,16 @@ function zonedWallTimeToUtc(year, month, day, hour, timeZone) {
   return new Date(guessMs);
 }
 
-// Y/M/D (in DAILY_RESET_TIMEZONE) of the most recent daily-reset boundary
+// Y/M/D (in the reset's timezone) of the most recent daily-reset boundary
 // that has already passed as of `now`.
-function getMostRecentResetYmd(now) {
+function getMostRecentResetYmd(now, reset) {
   const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: DAILY_RESET_TIMEZONE, hourCycle: 'h23',
+    timeZone: reset.timeZone, hourCycle: 'h23',
     year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit',
   }).formatToParts(now).reduce((acc, p) => { acc[p.type] = p.value; return acc; }, {});
 
   let year = Number(parts.year), month = Number(parts.month), day = Number(parts.day);
-  if (Number(parts.hour) < DAILY_RESET_HOUR) {
+  if (Number(parts.hour) < reset.hour) {
     const d = new Date(Date.UTC(year, month - 1, day));
     d.setUTCDate(d.getUTCDate() - 1);
     year = d.getUTCFullYear(); month = d.getUTCMonth() + 1; day = d.getUTCDate();
@@ -50,18 +56,18 @@ function getMostRecentResetYmd(now) {
 }
 
 // Returns the most recent daily-reset boundary (a Date, in UTC) that has
-// already passed as of `now`, per DAILY_RESET_HOUR/DAILY_RESET_TIMEZONE.
+// already passed as of `now`, per `reset` (default DAILY_RESET_HOUR/TIMEZONE).
 // Used by pullUtils.js's canClaimDailyPass for Daily Pass claim gating.
-export function getMostRecentDailyReset(now = new Date()) {
-  const { year, month, day } = getMostRecentResetYmd(now);
-  return zonedWallTimeToUtc(year, month, day, DAILY_RESET_HOUR, DAILY_RESET_TIMEZONE);
+export function getMostRecentDailyReset(now = new Date(), reset = DEFAULT_RESET) {
+  const { year, month, day } = getMostRecentResetYmd(now, reset);
+  return zonedWallTimeToUtc(year, month, day, reset.hour, reset.timeZone);
 }
 
 // Y-M-D key of the current in-game day, per the same reset boundary as
 // getMostRecentDailyReset — so History ledger rows line up with the Daily
 // Pass claim button's day boundary instead of local midnight.
-export function getToday() {
-  const { year, month, day } = getMostRecentResetYmd(new Date());
+export function getToday(reset = DEFAULT_RESET) {
+  const { year, month, day } = getMostRecentResetYmd(new Date(), reset);
   const m = String(month).padStart(2, '0');
   const d = String(day).padStart(2, '0');
   return `${year}-${m}-${d}`;

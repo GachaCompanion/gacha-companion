@@ -35,6 +35,9 @@ export function useSyncRouter({ handleUpdateGame, bannerDataRef, nteOverlayEnabl
 
   function handleStartSync(game) {
     if (syncState.running) return;
+    // No API/export to sync from — without this, the final `else` below would
+    // run the Genshin sync against an Umamusume game.
+    if (game.linkedDatabase === 'umamusume') return;
     activeIsNteRef.current = game.linkedDatabase === 'nte';
     if (game.linkedDatabase === 'hsr') {
       handleStartHsrSync(game);

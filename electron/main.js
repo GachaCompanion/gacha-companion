@@ -390,7 +390,22 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
+      // Needed only for the Umamusume Wish List tab's embedded planner (a
+      // <webview> — see UmamusumeWishListTab.js). Every webview that gets
+      // attached is locked down by the 'will-attach-webview' handler below.
+      webviewTag: true,
     },
+  });
+
+  // Lock down any <webview> the renderer attaches: no preload script, no Node,
+  // sandboxed, and only the planner site may be loaded into it. (Without this,
+  // webviewTag would let renderer code attach a webview to anything.)
+  mainWindow.webContents.on('will-attach-webview', (event, webPreferences, params) => {
+    delete webPreferences.preload;
+    webPreferences.nodeIntegration = false;
+    webPreferences.contextIsolation = true;
+    webPreferences.sandbox = true;
+    if (!String(params.src).startsWith('https://umacaratcalculator.com/')) event.preventDefault();
   });
 
   // Apply DWM rounded corners immediately — window is still hidden (show:false) so there is
@@ -558,6 +573,19 @@ function migrateToProfiles(dataRoot) {
 // ─── IPC handlers ─────────────────────────────────────────────────────────────
 
 ipcMain.handle('shell:openExternal', (_, url) => shell.openExternal(url));
+
+// Links inside the embedded planner that try to open a new window (target=_blank,
+// e.g. its "Open our Discord" link) go to the user's real browser instead of
+// spawning an in-app window. The login itself is NOT a popup — it's a normal
+// same-window redirect, which stays inside the webview on purpose so the login
+// completes in the embed's own storage.
+app.on('web-contents-created', (_, contents) => {
+  if (contents.getType() !== 'webview') return;
+  contents.setWindowOpenHandler(({ url }) => {
+    if (/^https?:\/\//i.test(url)) shell.openExternal(url);
+    return { action: 'deny' };
+  });
+});
 ipcMain.handle('theme:get-system', () => nativeTheme.shouldUseDarkColors ? 'dark' : 'light');
 
 nativeTheme.on('updated', () => {

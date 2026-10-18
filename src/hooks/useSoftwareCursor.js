@@ -87,6 +87,10 @@ export function useSoftwareCursor(hidden = false) {
     // z-index: max so it's always on top of page content.
     // will-change: transform for GPU-composited movement (no layout reflow on move).
     const el = document.createElement('div');
+    // Class hook so CSS can hide it (see index.css's `cursor-over-embed` rule —
+    // used while the pointer is over a cross-origin iframe, where this
+    // element would otherwise freeze at the frame's edge).
+    el.className = 'software-cursor';
     el.innerHTML = CURSOR_SVG;
     Object.assign(el.style, {
       position:      'fixed',

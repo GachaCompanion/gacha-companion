@@ -42,6 +42,13 @@
    via useSoftwareCursor() so DWM cannot override it in the window edge strip. */
 * { cursor: none !important; }
 
+/* Over a cross-origin iframe the page gets no mousemove, so the sparkle would
+   freeze at the frame's edge. The embed sets this class on <html> while the
+   pointer is inside it (see UmamusumeWishListTab.js) — the frame's own page
+   then shows the normal system cursor, since `cursor: none` above can't reach
+   into another origin's document. */
+html.cursor-over-embed .software-cursor { opacity: 0 !important; }
+
 /* ─── Glass overrides when a background image is active ─────────────────────── */
 html.has-bg {
   --panel-bg:             rgba(13, 13, 20, 0.68);

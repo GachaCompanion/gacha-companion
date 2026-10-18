@@ -10,6 +10,9 @@ import HistoryTab, { PullLogView } from './HistoryTab';
 import NtePullLogTab from '../games/nte/NtePullLogTab';
 import NteStatusTab from '../games/nte/NteStatusTab';
 import WuwaStatusTab from '../games/wuwa/WuwaStatusTab';
+import UmamusumeStatusTab from '../games/umamusume/UmamusumeStatusTab';
+import UmamusumeHistoryTab from '../games/umamusume/UmamusumeHistoryTab';
+import UmamusumeWishListTab from '../games/umamusume/UmamusumeWishListTab';
 import WishListTab from './WishListTab';
 import CostCalculatorTab from './CostCalculatorTab';
 import NteWishListTab from '../games/nte/NteWishListTab';
@@ -172,15 +175,22 @@ export default function GameDashboard({ game, onUpdate, onOpenSettings, bannerPa
     onUpdate({ ...game, state: { ...state, currency: newCurrency, history, dailyPassLastClaimedAt: new Date().toISOString() } });
   }
 
+  // Umamusume has no API/export to sync a pull log from, so it has no Pull
+  // Log or Roster (both read the pull log). Its Calculator (a different gacha
+  // model from every other game) isn't built yet — the generic one would show
+  // misleading pity inputs, so the tab is hidden until it exists.
+  const isUma = game.linkedDatabase === 'umamusume';
+  const hasPullLog = !!game.linkedDatabase && !isUma;
+
   const TABS = [
     ['status', t('Status')],
     ['history', t('History')],
-    ...(game.linkedDatabase ? [['pulllog', t('Pull Log')]] : []),
+    ...(hasPullLog ? [['pulllog', t('Pull Log')]] : []),
     ['wishlist', t('Wish List')],
     // Element-grouped list of maxed characters, derived from the pull log —
     // see CostCalculatorTab.js + engine/rosterGameConfig.js (per-game data).
-    ...(game.linkedDatabase ? [['costcalc', t('Roster')]] : []),
-    ['calculator', t('Calculator')],
+    ...(hasPullLog ? [['costcalc', t('Roster')]] : []),
+    ...(isUma ? [] : [['calculator', t('Calculator')]]),
   ];
 
   return (
@@ -225,6 +235,8 @@ export default function GameDashboard({ game, onUpdate, onOpenSettings, bannerPa
             <NteStatusTab game={game} onUpdate={onUpdate} color={color} />
           ) : game.linkedDatabase === 'wuwa' ? (
             <WuwaStatusTab game={game} onUpdate={onUpdate} color={color} />
+          ) : isUma ? (
+            <UmamusumeStatusTab game={game} onUpdate={onUpdate} color={color} />
           ) : (
             <StatusTab
               game={game} charBanner={charBanner}
@@ -245,9 +257,11 @@ export default function GameDashboard({ game, onUpdate, onOpenSettings, bannerPa
           )
         )}
         {tab === 'history' && (
-          <HistoryTab game={game} onUpdate={onUpdate} color={color} />
+          isUma
+            ? <UmamusumeHistoryTab game={game} onUpdate={onUpdate} color={color} />
+            : <HistoryTab game={game} onUpdate={onUpdate} color={color} />
         )}
-        {game.linkedDatabase && (
+        {hasPullLog && (
           <div style={{ display: tab !== 'pulllog' ? 'none' : 'contents' }}>
             {game.linkedDatabase === 'nte' ? (
               <NtePullLogTab game={game} color={color} prefetchedSchedule={bannerSchedule} />
@@ -268,7 +282,9 @@ export default function GameDashboard({ game, onUpdate, onOpenSettings, bannerPa
           </div>
         )}
         {tab === 'wishlist' && (
-          game.linkedDatabase === 'nte' ? (
+          isUma ? (
+            <UmamusumeWishListTab />
+          ) : game.linkedDatabase === 'nte' ? (
             <NteWishListTab game={game} onUpdate={onUpdate} color={color} />
           ) : (
             <WishListTab game={game} onUpdate={onUpdate} color={color} />

@@ -7,7 +7,7 @@ import ConfirmDialog from '../shared/components/ConfirmDialog';
 import './SettingsModal.css';
 import { ScrollArea } from '../shared/components/ScrollArea';
 
-const APP_VERSION = '1.0.2';
+const APP_VERSION = '1.0.3';
 const SECTIONS = ['General', 'Appearance', 'Bin', 'About'];
 
 const TEXT_SIZES = [

@@ -291,6 +291,7 @@ export const DATABASES = [
   { id: 'zzz',     name: 'Zenless Zone Zero' },
   { id: 'nte',     name: 'Neverness to Everness' },
   { id: 'wuwa',    name: 'Wuthering Waves' },
+  { id: 'umamusume', name: 'Umamusume: Pretty Derby' },
 ];
 
 export const DATABASE_FEATURES = {
@@ -299,6 +300,7 @@ export const DATABASE_FEATURES = {
   zzz:     [], // coming in V4
   nte:     [],
   wuwa:    [],
+  umamusume: [],
 };
 
 export function Field({ label, hint, required, error, children }) {

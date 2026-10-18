@@ -4,6 +4,11 @@ export const DB_CURRENCY_OVERRIDES = {
   zzz:     { currencyName: 'Polychrome',   pullItemName: 'Encrypted Master Tape' },
   nte:     { currencyName: 'Annulith',     pullItemName: 'Solid Dice', weaponPullItemName: 'Tri-Key' },
   wuwa:    { currencyName: 'Astrite',      pullItemName: 'Radiant Tide', weaponPullItemName: 'Forging Tide' },
+  // "Carats" is the combined label (Free + Paid) — the two balances are tracked
+  // separately (state.freeCarats / state.paidCarats, see UmamusumeStatusTab.js
+  // and umamusumeLedger.js). Trainee tickets = charPullItems, Support Card
+  // tickets = weaponPullItems, same dual-pull-item convention as NTE/WuWa.
+  umamusume: { currencyName: 'Carats', pullItemName: 'Trainee Scout Ticket', weaponPullItemName: 'Support Card Scout Ticket' },
 };
 
 // Per-database "daily login pass" name (Blessing of the Welkin Moon / Express
@@ -73,6 +78,17 @@ export const DB_BANNER_DEFAULTS = {
     charBanner:   { baseRate: 0.008, softPity: 70, hardPity: 80, has5050: true,  featuredChance: 0.5, guaranteeCarryOver: true },
     weaponBanner: { baseRate: 0.008, softPity: 70, hardPity: 80, has5050: false, featuredChance: 1.0, guaranteeCarryOver: true, specialMechanicId: 'none', specialMechanicConfig: {} },
   },
+  umamusume: {
+    costPerPull: 150,
+    // Not a pity system: a flat 3% SSR on every pull (no soft pity), and
+    // "hardPity" 200 is really the point-exchange threshold (1 pull = 1 point
+    // per banner, 200 points = one guaranteed pick of any listed SSR). Stored
+    // here only so the shared linked-database plumbing has the fields it
+    // expects — the real model lives in the Umamusume calculator (phase 3).
+    // featuredChance is one listed SSR's share of the SSR pool: 0.75% / 3%.
+    charBanner:   { baseRate: 0.03, softPity: 200, hardPity: 200, has5050: false, featuredChance: 0.25, guaranteeCarryOver: false },
+    weaponBanner: { baseRate: 0.03, softPity: 200, hardPity: 200, has5050: false, featuredChance: 0.25, guaranteeCarryOver: false, specialMechanicId: 'none', specialMechanicConfig: {} },
+  },
 };
 
 // Returns the locked banner-mechanics defaults for a linked database, or null
@@ -115,6 +131,8 @@ const DB_STATE_REMOVALS = {
   // WEAPON_FEATURED_RATE = 1.0), so weaponGuaranteed never has any effect
   // there, on top of the same missing Chronicled equivalent.
   wuwa: [...CHRONICLED_FIELDS, 'weaponGuaranteed'],
+  // No 50/50 and no guarantee state at all (see DB_BANNER_DEFAULTS.umamusume).
+  umamusume: [...CHRONICLED_FIELDS, 'charGuaranteed', 'weaponGuaranteed'],
 };
 
 function applyDbStateAdjustments(state, dbId) {
@@ -224,6 +242,20 @@ export const DB_GAME_LABELS = {
     charName: 'Resonator', weaponName: 'Weapon',
     charCopyLabel: 'Resonance Chain', weaponCopyLabel: 'Refinement',
     charCopyLetter: 'RC', weaponCopyLetter: 'R',
+  },
+  umamusume: {
+    charName: 'Trainee', weaponName: 'Support Card',
+    // Trainees have no copy count to label: an SSR trainee runs from 3 to 5
+    // stars, but pulling two copies is NOT simply 4 stars, so it can't be
+    // modelled as "N copies". Empty strings (not undefined) so the Genshin
+    // fallbacks ('Constellation'/'C') in resolveGameLabels don't kick in.
+    charCopyLabel: '', charCopyLetter: '',
+    // Support cards: 0LB = the base card, then +1 per extra copy up to 4LB,
+    // which the game calls MLB (Max Limit Break). NOTE the number comes
+    // BEFORE the letters ("2LB"), unlike the other games' letter-first
+    // format ("C2") — any consumer that builds `${letter}${n}` would need a
+    // special case for this game.
+    weaponCopyLabel: 'Limit Break', weaponCopyLetter: 'LB',
   },
 };
 
