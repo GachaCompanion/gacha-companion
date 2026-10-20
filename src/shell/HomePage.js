@@ -3,11 +3,6 @@ import { Camera, LayoutDashboard } from 'lucide-react';
 import TitleBar from '../shared/components/TitleBar';
 import DiamondIcon from '../shared/components/DiamondIcon';
 import splashLogo from '../assets/logo/logo_opening_screen.png';
-import showcasesIcon from '../assets/icon/Showcases_Icon.png';
-import gachaTrackerIcon from '../assets/icon/GachaTracker_Icon.png';
-import overviewIcon from '../assets/icon/Overview_Icon.png';
-import tileBgVideoOverview from '../assets/backgrounds/GachaCompanion_Homescreen_Button_Background_1.mp4';
-import tileBgVideoAurora from '../assets/backgrounds/GachaCompanion_Homescreen_Button_Background_2.mp4';
 import './HomePage.css';
 
 // Same technique as the splash's loading-% text (see below) — CSS
@@ -84,9 +79,8 @@ function TileLabel({ text, gradientId, width = 198, height = 36, fontSize = 15, 
     <svg className="homepage-tile-label" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet">
       <defs>
         <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#D164BB" />
-          <stop offset="50%" stopColor="#A764D6" />
-          <stop offset="100%" stopColor="#643991" />
+          <stop offset="0%" style={{ stopColor: 'color-mix(in srgb, var(--accent) 75%, white)' }} />
+          <stop offset="100%" style={{ stopColor: 'color-mix(in srgb, var(--accent) 60%, black)' }} />
         </linearGradient>
       </defs>
       {bg && (
@@ -144,9 +138,8 @@ function TileRing({ gradientId, width = 198, height = 119, rx = 22.5, padX = 7, 
     >
       <defs>
         <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#D164BB" />
-          <stop offset="50%" stopColor="#A764D6" />
-          <stop offset="100%" stopColor="#643991" />
+          <stop offset="0%" style={{ stopColor: 'color-mix(in srgb, var(--accent) 75%, white)' }} />
+          <stop offset="100%" style={{ stopColor: 'color-mix(in srgb, var(--accent) 60%, black)' }} />
         </linearGradient>
       </defs>
       <rect
@@ -382,13 +375,9 @@ export default function HomePage({
               disabled={!isReady || !btnVisible}
             >
               <div className="homepage-tile-clip">
-                <video className="homepage-tile-bg" src={tileBgVideoAurora} autoPlay loop muted playsInline />
-                <div className="homepage-tile-icon-float" style={{ animationDelay: '0s' }}>
-                  <img src={showcasesIcon} alt="" className="homepage-tile-icon" />
-                </div>
                 <div className="homepage-tile-overlay" />
                 <TileLabel text="Showcases" gradientId="tileLabelGradientShowcases" />
-                <span className="homepage-tile-glyph"><Camera size={32} /></span>
+                <span className="homepage-tile-glyph"><Camera size={40} /></span>
               </div>
               <TileRing gradientId="tileRingGradientShowcases" />
             </button>
@@ -398,13 +387,9 @@ export default function HomePage({
               disabled={!isReady || !btnVisible}
             >
               <div className="homepage-tile-clip">
-                <video className="homepage-tile-bg" src={tileBgVideoOverview} autoPlay loop muted playsInline />
-                <div className="homepage-tile-icon-float" style={{ animationDelay: '-1.5s' }}>
-                  <img src={overviewIcon} alt="" className="homepage-tile-icon" />
-                </div>
                 <div className="homepage-tile-overlay" />
                 <TileLabel text="Overview" gradientId="tileLabelGradientOverviewTile" />
-                <span className="homepage-tile-glyph"><LayoutDashboard size={32} /></span>
+                <span className="homepage-tile-glyph"><LayoutDashboard size={40} /></span>
               </div>
               <TileRing gradientId="tileRingGradientOverviewTile" />
             </button>
@@ -414,13 +399,9 @@ export default function HomePage({
               disabled={!isReady || !btnVisible}
             >
               <div className="homepage-tile-clip">
-                <video className="homepage-tile-bg" src={tileBgVideoAurora} autoPlay loop muted playsInline />
-                <div className="homepage-tile-icon-float" style={{ animationDelay: '-3s' }}>
-                  <img src={gachaTrackerIcon} alt="" className="homepage-tile-icon homepage-tile-icon--tracker" />
-                </div>
                 <div className="homepage-tile-overlay" />
                 <TileLabel text="Gacha Tracker" gradientId="tileLabelGradientTracker" />
-                <span className="homepage-tile-glyph"><DiamondIcon size={32} /></span>
+                <span className="homepage-tile-glyph"><DiamondIcon size={40} /></span>
               </div>
               <TileRing gradientId="tileRingGradientTracker" />
             </button>

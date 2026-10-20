@@ -3,6 +3,7 @@ import { Home, Camera } from 'lucide-react';
 import DiamondIcon from '../../shared/components/DiamondIcon';
 import { resolveGameLabels, resolveGameCurrency } from '../gacha-tracker/engine/gameSchema';
 import { canClaimDailyPass } from '../gacha-tracker/engine/pullUtils';
+import { UMA_RESET } from '../gacha-tracker/games/umamusume/umamusumeLedger';
 import { useT } from '../../shared/i18n';
 import './Overview.css';
 
@@ -212,7 +213,11 @@ function CarouselCard({ game, rowIndex, flipAllRequest }) {
   const labels   = resolveGameLabels(game);
   const currency = resolveGameCurrency(game);
   const state    = game.state ?? {};
-  const canClaim = canClaimDailyPass(state.dailyPassLastClaimedAt);
+  const canClaim = canClaimDailyPass(
+    state.dailyPassLastClaimedAt,
+    new Date(),
+    game.linkedDatabase === 'umamusume' ? UMA_RESET : undefined,
+  );
 
   // has5050 is the same signal the actual Calculator components already use
   // to decide whether a banner's Guaranteed toggle applies at all (e.g.

@@ -208,24 +208,21 @@
   transition: opacity 0.25s ease;
 }
 
-/* Apple-TV-style wide tile — rounded rectangle, not a pill/square icon.
-   Same 3-part hover pattern as the user's own onepage.me site: the image
-   zooms in (clipped to the tile's fixed frame via overflow:hidden, so the
-   TILE itself never changes size), a dark overlay fades in, and the label
-   (hidden at rest) fades in on top of it — so at rest it reads as pure
-   artwork, and hovering reveals what it actually links to. */
+/* Wide rounded tile: an accent-tinted top-to-bottom gradient with a centered
+   glyph. On hover a dark overlay fades in, the label appears and the glyph
+   slides down to make room for it. The tile itself never changes size. */
 .homepage-tile {
   position: relative;
   width: 198px;
   height: 119px;
   padding: 0;
   border-radius: 18px;
-  background: var(--bg-elevated);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 40%, #14141c), #14141c);
   box-shadow: 8px 8px 4px rgba(0, 0, 0, 0.5);
   cursor: var(--cur-pointer);
 }
 
-/* Clips the icon zoom/overlay/label to the tile's frame. Split out from
+/* Clips the overlay/label/glyph to the tile's frame. Split out from
    .homepage-tile itself so that .homepage-tile-ring (a sibling, not a
    descendant of this wrapper) isn't also clipped — its stroke is centered
    on the tile's true edge, so half its width needs to render outside the
@@ -249,59 +246,6 @@
   width: calc(100% + 14px);
   height: calc(100% + 14px);
   pointer-events: none;
-}
-
-.homepage-tile-bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  pointer-events: none;
-  transform: scale(1);
-  transition: transform 0.4s ease;
-}
-
-.homepage-tile:not(:disabled):hover .homepage-tile-bg {
-  transform: scale(1.15);
-}
-
-/* Wraps each icon so the idle float animation (transform: translateY/rotate,
-   below) doesn't fight over the `transform` property with the icon's own
-   hover-driven scale — animating the same property on the same element from
-   two different rules only lets one win. Positioned/sized like the old
-   .homepage-tile-icon used to be; the img inside just fills it. */
-.homepage-tile-icon-float {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  animation: homepageTileIconFloat 4.5s ease-in-out infinite;
-}
-
-@keyframes homepageTileIconFloat {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50%      { transform: translateY(-4px) rotate(1deg); }
-}
-
-.homepage-tile-icon {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  pointer-events: none;
-  transform: scale(var(--icon-scale, 1));
-  transition: transform 0.4s ease;
-}
-
-/* Gacha Tracker artwork reads slightly smaller than Showcases' at the same
-   base scale — nudged up so the two tiles feel visually matched at rest.
-   Hover multiplies on top of this via calc(), so the zoom-in stays 1.15x
-   relative to each icon's own base size, not a fixed absolute scale. */
-.homepage-tile-icon--tracker {
-  --icon-scale: 1.08;
-}
-
-.homepage-tile:not(:disabled):hover .homepage-tile-icon {
-  transform: scale(calc(var(--icon-scale, 1) * 1.15));
 }
 
 .homepage-tile-overlay {
@@ -371,22 +315,20 @@
   cursor: var(--cur-default);
 }
 
-/* Small reminder glyph shown only on hover, sitting just under the label —
-   teaches the same icon used for this page's cross-nav button in the
-   sidebar (see Sidebar.js/showcaseComponents.js/trackerComponents.js), so
-   the association reads before the user ever opens the sidebar. */
+/* Main tile icon — the same glyph used for this page's cross-nav button in
+   the sidebar (see Sidebar.js/showcaseComponents.js/trackerComponents.js). */
 .homepage-tile-glyph {
   position: absolute;
   left: 50%;
-  bottom: 26px;
-  transform: translateX(-50%);
+  top: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   color: #fff;
-  opacity: 0;
-  transition: opacity 0.25s ease;
+  transition: transform 0.25s ease;
   pointer-events: none;
 }
 
+/* Slides down to make room for the label on hover. */
 .homepage-tile:not(:disabled):hover .homepage-tile-glyph {
-  opacity: 1;
+  transform: translate(-50%, calc(-50% + 20px));
 }
